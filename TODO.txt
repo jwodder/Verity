@@ -1,0 +1,6 @@
+VERITY TO-DO
+- Replace all occurrences of my SourceForge e-mail address with my SDF address?
+- Update the copyright dates to include 2008
+- Update the version number
+- Include a version history in the README?
+- Implement (Embedded?) PostScript output

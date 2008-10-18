@@ -16,13 +16,16 @@
    You should have received a copy of the GNU General Public License
    along with Verity.  If not, see <http://www.gnu.org/licenses/>. */
 
+/* $Id$ */
+
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <unistd.h>
 #include "veritypes.h"
 #include "veriprint.h"
-void yyerror(char*);
+void yyerror(char*, ...);
 int yylex(void);
 extern FILE* yyin;
 
@@ -67,9 +70,19 @@ expr: SYM  {$$ = symExpr($1); }
 	| '(' expr ')'  {$$ = parenExpr($2); }
 	;
 %%
-void yyerror(char* s) {fprintf(stderr, "verity: %s\n", s); }
+
+void yyerror(char* s, ...) {
+ fprintf(stderr, "verity: ");
+ va_list arg;
+ va_start(arg, s);
+ vfprintf(stderr, s, arg);
+ va_end(arg);
+ fputc('\n', stderr);
+ exit(3);
+}
 
 int main(int argc, char** argv) {
+ yyin = stdin;
  int opt;
  while ((opt = getopt(argc, argv, "o:plte:sVh")) != -1) {
   switch (opt) {

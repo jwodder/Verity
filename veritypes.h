@@ -16,12 +16,15 @@
    You should have received a copy of the GNU General Public License
    along with Verity.  If not, see <http://www.gnu.org/licenses/>. */
 
+/* $Id$ */
+
 #ifndef VERITYPES_H
 #define VERITYPES_H
 #include <stdio.h>
+#include <stdlib.h>
 
 #ifndef checkMem
-#define checkMem(p)  if (!p) {fprintf(stderr, "verity: %s: l.%d: failure to allocate memory: ", __FILE__, __LINE__); perror(NULL); exit(1); }
+#define checkMem(p)  if (!p) {perror("verity"); exit(1); }
 #endif
 
 typedef struct {char c; _Bool truth; } symbol;

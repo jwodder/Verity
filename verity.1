@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "VERITY 1"
-.TH VERITY 1 "2008-03-06" "Version 1.2.1" ""
+.TH VERITY 1 "2008-10-17" "Version 1.2.1" ""
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -180,15 +180,14 @@ Display version information & exit
 .IX Header "STATEMENT SYNTAX"
 Statements consist of letters (other than \f(CW\*(C`v\*(C'\fR, \f(CW\*(C`x\*(C'\fR, and \f(CW\*(C`X\*(C'\fR), representing
 boolean variables, combined with logical \s-1AND\s0 (\f(CW\*(C`^\*(C'\fR, \f(CW\*(C`&\*(C'\fR, or \f(CW\*(C`&&\*(C'\fR), logical
-inclusive \s-1OR\s0 (\f(CW\*(C`v\*(C'\fR or \f(CW\*(C`||\*(C'\fR), and/or logical exclusive \s-1OR\s0 (\f(CW\*(C`x\*(C'\fR or \f(CW\*(C`X\*(C'\fR).
-Statements may be grouped within parentheses and negated with \f(CW\*(C`\-\*(C'\fR, \f(CW\*(C`!\*(C'\fR, or
-\&\f(CW\*(C`~\*(C'\fR.  They may also be combined with \f(CW\*(C`\->\*(C'\fR, which results in a statement
-which is false if & only if the left statement is true & the right statement
-false, and \f(CW\*(C`<\->\*(C'\fR, which creates a statement which is true if and only if
-both the left & right statements have the same boolean value.  Parentheses and
-the negation operator have the highest & second highest precedence,
-respectively, followed by the \s-1AND\s0, \s-1OR\s0, and \s-1XOR\s0 operators, then \f(CW\*(C`\->\*(C'\fR, and
-finally \f(CW\*(C`<\->\*(C'\fR.  All binary operators are left-associative.
+inclusive \s-1OR\s0 (\f(CW\*(C`v\*(C'\fR, \f(CW\*(C`|\*(C'\fR, or \f(CW\*(C`||\*(C'\fR), and/or logical exclusive \s-1OR\s0 (\f(CW\*(C`x\*(C'\fR or
+\&\f(CW\*(C`X\*(C'\fR).  Statements may be grouped within parentheses and negated with \f(CW\*(C`\-\*(C'\fR,
+\&\f(CW\*(C`!\*(C'\fR, or \f(CW\*(C`~\*(C'\fR.  They may also be combined with \f(CW\*(C`\->\*(C'\fR, which results in a
+statement which is false if & only if the left statement is true & the right
+statement false, and \f(CW\*(C`<\->\*(C'\fR, which creates a statement which is true if and
+only if both the left & right statements have the same boolean value.
+Parentheses and the negation operator have the highest & second highest
+precedence, respectively, followed by the \s-1AND\s0, \s-1OR\s0, and \s-1XOR\s0 operators, then \f(CW\*(C`\->\*(C'\fR, and finally \f(CW\*(C`<\->\*(C'\fR.  All binary operators are left-associative.
 .PP
 Statements are separated by semicolons or newlines, and all statements listed
 in the input file are output in the resulting truth table.  There is no need to

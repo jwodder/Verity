@@ -67,15 +67,15 @@ Display version information & exit
 
 Statements consist of letters (other than C<v>, C<x>, and C<X>), representing
 boolean variables, combined with logical AND (C<^>, C<&>, or C<&&>), logical
-inclusive OR (C<v> or C<||>), and/or logical exclusive OR (C<x> or C<X>).
-Statements may be grouped within parentheses and negated with C<->, C<!>, or
-C<~>.  They may also be combined with C<< -> >>, which results in a statement
-which is false if & only if the left statement is true & the right statement
-false, and C<< <-> >>, which creates a statement which is true if and only if
-both the left & right statements have the same boolean value.  Parentheses and
-the negation operator have the highest & second highest precedence,
-respectively, followed by the AND, OR, and XOR operators, then C<< -> >>, and
-finally C<< <-> >>.  All binary operators are left-associative.
+inclusive OR (C<v>, C<|>, or C<||>), and/or logical exclusive OR (C<x> or
+C<X>).  Statements may be grouped within parentheses and negated with C<->,
+C<!>, or C<~>.  They may also be combined with C<< -> >>, which results in a
+statement which is false if & only if the left statement is true & the right
+statement false, and C<< <-> >>, which creates a statement which is true if and
+only if both the left & right statements have the same boolean value.
+Parentheses and the negation operator have the highest & second highest
+precedence, respectively, followed by the AND, OR, and XOR operators, then C<<
+-> >>, and finally C<< <-> >>.  All binary operators are left-associative.
 
 Statements are separated by semicolons or newlines, and all statements listed
 in the input file are output in the resulting truth table.  There is no need to
