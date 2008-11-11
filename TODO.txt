@@ -1,6 +1,13 @@
 VERITY TO-DO
-- Replace all occurrences of my SourceForge e-mail address with my SDF address?
+- Replace all occurrences of my SourceForge e-mail address with my SDF address
 - Update the copyright dates to include 2008
-- Update the version number
-- Include a version history in the README?
+- Include a version history in the README
 - Implement (Embedded?) PostScript output
+- Improve the code?  (I seem to recall it needing improvements)
+ - Make the symbol table type into a linked list of its own rather than
+   wrapping it in a container linked list (and do the same for statements?)
+- Rewrite yyerror() to print out the input line number
+- When this is all done, update the version number & release a new version
+- Rewrite checkMem() to call yyerror()?
+- Document the fact that comments don't constitute statement delimiters (or
+  should they?)

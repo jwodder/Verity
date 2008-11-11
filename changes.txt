@@ -1,0 +1,3 @@
+CHANGES MADE IN VERSION 1.2.2
+- Variables named '[vVxX]' may be used by preceding them with backslashes
+- Empty files/files containing only whitespace are no longer valid input

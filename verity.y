@@ -31,9 +31,10 @@ extern FILE* yyin;
 
 struct {
  enum {txtTbl=0, latexTbl, texTbl} tblType;
- _Bool eval, standalone : 1;
+ _Bool eval : 1, standalone : 1;
 } flags = {0};
 %}
+
 %union {symbol* sym; expr* stmnt; }
 %token <sym> SYM
 %type <stmnt> expr statement
@@ -44,21 +45,26 @@ struct {
 %left AND OR XOR
 %nonassoc NOT
 %nonassoc '(' ')'
+
 %%
-file: exprSet {printTbl(); if (flags.standalone) printDocEnd(); }
-	| blocks {if (flags.standalone) printDocEnd(); } | ;
 
-blocks: blocks '{' exprSet '}'  {printTbl(); clearLists(); }
-	| '{' exprSet '}'  {printTbl(); clearLists(); }
-	| blocks EOL | EOL blocks ;
+file: exprSet gap {printTbl(); if (flags.standalone) printDocEnd(); }
+	| blocks gap {if (flags.standalone) printDocEnd(); }
+	;
 
-exprSet: exprSet EOL statement  {pushItem(statements, $3); }
-	| statement  {pushItem(statements, $1); }
-	| EOL statement  {pushItem(statements, $2); }
-	| exprSet EOL | EOL ;
+blocks: blocks gap '{' exprSet gap '}'  {printTbl(); clearLists(); }
+	| gap '{' exprSet gap '}'  {printTbl(); clearLists(); }
+	;
+
+exprSet: exprSet gap EOL statement  {pushItem(statements, $4); }
+	| gap statement  {pushItem(statements, $2); }
+	;
+
+gap: gap EOL  |  ;
 
 statement: SYM ':' expr  {$$ = colonExpr($1, $3); }
-	| expr  {$$ = $1; } ;
+	| expr  {$$ = $1; }
+	;
 
 expr: SYM  {$$ = symExpr($1); }
 	| NOT expr  {$$ = notExpr($2); }
@@ -69,6 +75,7 @@ expr: SYM  {$$ = symExpr($1); }
 	| expr EQ expr  {$$ = opExpr(EQ, $1, $3); }
 	| '(' expr ')'  {$$ = parenExpr($2); }
 	;
+
 %%
 
 void yyerror(char* s, ...) {
@@ -82,13 +89,14 @@ void yyerror(char* s, ...) {
 }
 
 int main(int argc, char** argv) {
- yyin = stdin;
  int opt;
  while ((opt = getopt(argc, argv, "o:plte:sVh")) != -1) {
   switch (opt) {
    case 'o':
     if (freopen(optarg, "w", stdout) == NULL) {
-     fprintf(stderr, "verity: %s: ", optarg); perror(NULL); return 2;
+     fprintf(stderr, "verity: %s: ", optarg);
+     perror(NULL);
+     return 5;
     }
     break;
    case 'p': flags.tblType = txtTbl; break;
@@ -96,14 +104,16 @@ int main(int argc, char** argv) {
    case 't': flags.tblType = texTbl; break;
    case 'e':
     if (!flags.eval) {
-     flags.eval = 1; /*fclose(yyin);*/ yyin = tmpfile();
-     /* Some operating systems object to trying to close stdin */
+     flags.eval = 1;
+     yyin = tmpfile();
      if (!yyin) {
       fprintf(stderr, "verity: error creating temp file: "); perror(NULL);
       return 4;
      }
     }
-    fputs(optarg, yyin); fputc('\n', yyin); break;
+    fputs(optarg, yyin);
+    fputc('\n', yyin);
+    break;
    case 's': flags.standalone = 1; break;
    case 'V':
     printf("Verity, a truth table generator, v.1.2.1\n"
@@ -117,14 +127,14 @@ int main(int argc, char** argv) {
     printf("Usage: verity [-p | -t | -l] [-s] [-o outfile] [-e statements |"
      " infile]\n       verity [-h | -V]\n\n"
      "Options:\n"
-     "\t-e  Treat statements as input\n"
-     "\t-h  Print this summary of command-line options and exit\n"
-     "\t-l  Output a LaTeX tabular\n"
-     "\t-o  Write output to `outfile'\n"
-     "\t-p  Output plain text\n"
-     "\t-s  Output a complete Tex/LaTeX document\n"
-     "\t-t  Output a TeX table\n"
-     "\t-V  Print version information and exit\n");
+     "  -e  Treat statements as input\n"
+     "  -h  Print this summary of command-line options and exit\n"
+     "  -l  Output a LaTeX tabular\n"
+     "  -o  Write output to `outfile'\n"
+     "  -p  Output plain text\n"
+     "  -s  Output a complete Tex/LaTeX document\n"
+     "  -t  Output a TeX table\n"
+     "  -V  Print version information and exit\n");
     return 0;
    default:
     fprintf(stderr, "Usage: verity [-p | -t | -l] [-s] [-o outfile] [-e"
@@ -136,7 +146,9 @@ int main(int argc, char** argv) {
  else if (optind < argc) {
   yyin = fopen(argv[optind], "r");
   if (!yyin) {
-   fprintf(stderr, "verity: %s: ", argv[optind]); perror(NULL); return 1;
+   fprintf(stderr, "verity: %s: ", argv[optind]);
+   perror(NULL);
+   return 5;
   }
  }
  initLists();

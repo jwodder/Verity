@@ -28,10 +28,11 @@
 extern void yyerror(char*, ...);
 
 FILE* yyin;
-/* yyin is initialized at the beginning of main() because I can't set it to a
- * non-const value here. */
 
 int yylex(void) {
+ if (yyin == NULL) yyin = stdin;
+ /* yyin is initialized here because I can't set it to a non-const value above.
+  */
  if (feof(yyin)) return 0;
  else if (ferror(yyin)) {
   yyerror("error reading input: %s", strerror(errno));
@@ -84,6 +85,9 @@ int yylex(void) {
     else if (ch == EOF) {
      fprintf(stderr, "verity: warning: invalid backslash before end-of-file\n");
      return 0;
+    } else if (ch == 'x' || ch == 'X' || ch == 'v' || ch == 'V') {
+     yylval.sym = getSym(ch);
+     return SYM;
     } else {yyerror("invalid escape sequence \"\\%c\"", ch); exit(3); }
    case EOF:
     if (feof(yyin)) return 0;

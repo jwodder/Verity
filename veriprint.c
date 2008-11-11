@@ -37,7 +37,7 @@ void printTbl(void) {
  vars = calloc(symTbl->qty, sizeof(symbol*));
  checkMem(vars);
  foreach(symTbl, s) if (((symbol*)s->val)->truth) vars[varno++] = s->val;
- if (statements->qty)
+ /* if (statements->qty) */
   switch (flags.tblType) {
    case latexTbl: printLaTeXTbl(); break;
    case texTbl: printTeXTbl(); break;

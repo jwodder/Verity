@@ -7,13 +7,11 @@ CFLAGS = -std=c99 -O2
 all : verity verity.1
 
 verity : $(OBJS)
-	gcc -o verity $(OBJS)
+	cc -o verity $(OBJS)
 verity.tab.o verilex.o veritypes.o veriprint.o : veritypes.h
 verilex.o veritypes.o veriprint.o : verity.tab.h
 verity.tab.o veriprint.o : veriprint.h
-verity.tab.c : verity.y
-	bison -d verity.y
-verity.tab.h : verity.y
+verity.tab.c verity.tab.h : verity.y
 	bison -d verity.y
 
 verity.1 : verity.pod

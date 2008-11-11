@@ -108,7 +108,7 @@ As plain text, the output for the above is:
 
 For a somewhat more complex example, consider the following statements.  Note
 that the statement C<p v -q> is assigned to the variable C<S> for ease of
-reference in the following statement.
+reference in the statement after it.
 
     -p x q
     S : p v -q
