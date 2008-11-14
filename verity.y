@@ -56,8 +56,8 @@ blocks: blocks gap '{' exprSet gap '}'  {printTbl(); clearLists(); }
 	| gap '{' exprSet gap '}'  {printTbl(); clearLists(); }
 	;
 
-exprSet: exprSet gap EOL statement  {pushItem(statements, $4); }
-	| gap statement  {pushItem(statements, $2); }
+exprSet: exprSet gap EOL statement  {addStmnt($4); }
+	| gap statement  {addStmnt($2); }
 	;
 
 gap: gap EOL  |  ;
@@ -151,7 +151,6 @@ int main(int argc, char** argv) {
    return 5;
   }
  }
- initLists();
  if (flags.standalone) printDocTop();
  return yyparse();
 }

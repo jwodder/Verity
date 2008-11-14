@@ -34,15 +34,15 @@ int varno;
 
 void printTbl(void) {
  varno = 0;
- vars = calloc(symTbl->qty, sizeof(symbol*));
+ vars = calloc(symQty, sizeof(symbol*));
  checkMem(vars);
- foreach(symTbl, s) if (((symbol*)s->val)->truth) vars[varno++] = s->val;
- /* if (statements->qty) */
-  switch (flags.tblType) {
-   case latexTbl: printLaTeXTbl(); break;
-   case texTbl: printTeXTbl(); break;
-   case txtTbl: printTxtTbl(); break;
-  }
+ for (symbol* s = symTbl; s != NULL; s = s->next)
+  if (s->truth) vars[varno++] = s;
+ switch (flags.tblType) {
+  case latexTbl: printLaTeXTbl(); break;
+  case texTbl: printTeXTbl(); break;
+  case txtTbl: printTxtTbl(); break;
+ }
  putchar('\n');
  free(vars);
 }
@@ -50,7 +50,7 @@ void printTbl(void) {
 void printLaTeXTbl(void) {
  int i;
  fputs("\\begin{tabular}{", stdout);
- for (i=0; i < varno + statements->qty; i++) {
+ for (i=0; i < varno + stmntQty; i++) {
   if (i) putchar('|'); putchar('c');
  }
  fputs("}\n", stdout);
@@ -58,20 +58,24 @@ void printLaTeXTbl(void) {
   if (i) fputs(" & ", stdout);
   putchar('$'); putchar(vars[i]->c); putchar('$');
  }
- foreach(statements, ex) {
-  fputs(" & $", stdout); printTeXExp(ex->val); putchar('$');
+ for (expr* ex = statements; ex != NULL; ex = ex->next) {
+  fputs(" & $", stdout);
+  printTeXExp(ex);
+  putchar('$');
  }
  fputs(" \\\\ \\hline\n", stdout);
  do {
   for (i=0; i<varno; i++) {
-   if (i) fputs(" & ", stdout); putchar(vars[i]->truth ? 'T' : 'F');
+   if (i) fputs(" & ", stdout);
+   putchar(vars[i]->truth ? 'T' : 'F');
   }
-  foreach(statements, ex) {
-   fputs(" & ", stdout); putchar(evalExpr(ex->val) ? 'T' : 'F');
+  for (expr* ex = statements; ex != NULL; ex = ex->next) {
+   fputs(" & ", stdout);
+   putchar(evalExpr(ex) ? 'T' : 'F');
   }
   fputs(" \\\\\n", stdout);
-  for (i=varno-1; i>-1; i--) if (!(vars[i]->truth = !(vars[i]->truth))) break;
- } while (i > -1);
+  for (i=varno-1; i>=0; i--) if (!(vars[i]->truth = !(vars[i]->truth))) break;
+ } while (i >= 0);
  fputs("\\end{tabular}\n", stdout);
 }
 
@@ -123,37 +127,40 @@ int exprLength(expr* ex) { /* Probably needs improvement */
 void printTxtTbl(void) {
  int i;
  for (i=0; i<varno; i++) {if (i) putchar('|'); putchar(vars[i]->c); }
- int* stmntLen = calloc(statements->qty, sizeof(int));
+ int* stmntLen = calloc(stmntQty, sizeof(int));
  checkMem(stmntLen);
  i=0;
- foreach(statements, ex) {
-  putchar('|'); printTxtExp(ex->val);
-  stmntLen[i++] = exprLength(ex->val);
+ for (expr* ex = statements; ex != NULL; ex = ex->next) {
+  putchar('|');
+  printTxtExp(ex);
+  stmntLen[i++] = exprLength(ex);
   /* Should printTxtExp() return the length instead? */
  }
  putchar('\n');
  for (i=0; i<varno; i++) {if (i) putchar('|'); putchar('-'); }
- for (i=0; i < statements->qty; i++) {
-  putchar('|'); for (int j=0; j<stmntLen[i]; j++) putchar('-');
+ for (i=0; i<stmntQty; i++) {
+  putchar('|');
+  for (int j=0; j<stmntLen[i]; j++) putchar('-');
  }
  putchar('\n');
  do {
   for (i=0; i<varno; i++) {
-   if (i) putchar('|'); putchar(vars[i]->truth ? 'T' : 'F');
+   if (i) putchar('|');
+   putchar(vars[i]->truth ? 'T' : 'F');
   }
   i=0;
-  foreach(statements, ex) {
+  for (expr* ex = statements; ex != NULL; ex = ex->next) {
    putchar('|');
    int j, len = stmntLen[i]/2 - !(stmntLen[i] % 2);
    for (j=0; j<len; j++) putchar(' ');
-   putchar(evalExpr(ex->val) ? 'T' : 'F');
+   putchar(evalExpr(ex) ? 'T' : 'F');
    len += !(stmntLen[i] % 2);
    if (ex->next) for (j=0; j<len; j++) putchar(' ');
    i++;
   }
   putchar('\n');
-  for (i=varno-1; i>-1; i--) if (!(vars[i]->truth = !(vars[i]->truth))) break;
- } while (i > -1);
+  for (i=varno-1; i>=0; i--) if (!(vars[i]->truth = !(vars[i]->truth))) break;
+ } while (i >= 0);
 }
 
 void printTxtExp(expr* ex) {
@@ -194,27 +201,34 @@ void printDocEnd(void) {
 void printTeXTbl(void) {
  int i;
  fputs("$$\\vbox{\\offinterlineskip\\halign{\n\\strut", stdout);
- for (i=0; i < varno + statements->qty; i++) {
-  if (i) fputs(" & \\vrule", stdout); fputs("\\hfil\\ #\\ \\hfil", stdout);
+ for (i=0; i < varno + stmntQty; i++) {
+  if (i) fputs(" & \\vrule", stdout);
+  fputs("\\hfil\\ #\\ \\hfil", stdout);
  }
  fputs("\\cr\n", stdout);
  for (i=0; i<varno; i++) {
   if (i) fputs(" & ", stdout);
-  putchar('$'); putchar(vars[i]->c); putchar('$');
+  putchar('$');
+  putchar(vars[i]->c);
+  putchar('$');
  }
- foreach(statements, ex) {
-  fputs(" & $", stdout); printTeXExp(ex->val); putchar('$');
+ for (expr* ex = statements; ex != NULL; ex = ex->next) {
+  fputs(" & $", stdout);
+  printTeXExp(ex);
+  putchar('$');
  }
  fputs("\\cr\\noalign{\\hrule}\n", stdout);
  do {
   for (i=0; i<varno; i++) {
-   if (i) fputs(" & ", stdout); putchar(vars[i]->truth ? 'T' : 'F');
+   if (i) fputs(" & ", stdout);
+   putchar(vars[i]->truth ? 'T' : 'F');
   }
-  foreach(statements, ex) {
-   fputs(" & ", stdout); putchar(evalExpr(ex->val) ? 'T' : 'F');
+  for (expr* ex = statements; ex != NULL; ex = ex->next) {
+   fputs(" & ", stdout);
+   putchar(evalExpr(ex) ? 'T' : 'F');
   }
   fputs("\\cr\n", stdout);
-  for (i=varno-1; i>-1; i--) if (!(vars[i]->truth = !(vars[i]->truth))) break;
- } while (i > -1);
+  for (i=varno-1; i>=0; i--) if (!(vars[i]->truth = !(vars[i]->truth))) break;
+ } while (i >= 0);
  fputs("}}$$\n", stdout);
 }

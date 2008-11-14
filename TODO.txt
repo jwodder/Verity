@@ -4,10 +4,10 @@ VERITY TO-DO
 - Include a version history in the README
 - Implement (Embedded?) PostScript output
 - Improve the code?  (I seem to recall it needing improvements)
- - Make the symbol table type into a linked list of its own rather than
-   wrapping it in a container linked list (and do the same for statements?)
+ - Improve veriprint.c
 - Rewrite yyerror() to print out the input line number
 - When this is all done, update the version number & release a new version
 - Rewrite checkMem() to call yyerror()?
 - Document the fact that comments don't constitute statement delimiters (or
   should they?)
+- Make commas valid statement delimiters?
