@@ -22,13 +22,15 @@
 #define VERIPRINT_H
 #include <stdio.h>
 #include "veritypes.h"
-void printTbl(void);
-void printLaTeXTbl(void);
-void printTeXExp(expr* ex);
-int exprLength(expr* ex);
-void printTxtTbl(void);
-void printTxtExp(expr* ex);
+
 void printDocTop(void);
 void printDocEnd(void);
-void printTeXTbl(void);
+void printTbl(void);
+
+void printLaTeXTbl(symbol** vars, int varno);
+void printTeXTbl(symbol** vars, int varno);
+void printTeXExp(expr* ex);
+
+void printTxtTbl(symbol** vars, int varno);
+int printTxtExp(expr* ex);
 #endif

@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "veriprint.h"
 #include "veritypes.h"
 #include "verity.tab.h"
@@ -29,29 +30,37 @@ extern struct {
  _Bool eval, standalone : 1;
 } flags;
 
-symbol** vars;
-int varno;
+void printDocTop(void) {
+ if (flags.tblType == latexTbl)
+  puts("\\documentclass{article}\n\\begin{document}\n\\begin{center}");
+}
+
+void printDocEnd(void) {
+ if (flags.tblType == latexTbl) puts("\\end{center}\n\\end{document}");
+ else if (flags.tblType == texTbl) puts("\\bye");
+}
 
 void printTbl(void) {
- varno = 0;
- vars = calloc(symQty, sizeof(symbol*));
+ int varno = 0;
+ symbol** vars = calloc(symQty, sizeof(symbol*));
  checkMem(vars);
  for (symbol* s = symTbl; s != NULL; s = s->next)
   if (s->truth) vars[varno++] = s;
  switch (flags.tblType) {
-  case latexTbl: printLaTeXTbl(); break;
-  case texTbl: printTeXTbl(); break;
-  case txtTbl: printTxtTbl(); break;
+  case latexTbl: printLaTeXTbl(vars, varno); break;
+  case texTbl: printTeXTbl(vars, varno); break;
+  case txtTbl: printTxtTbl(vars, varno); break;
  }
  putchar('\n');
  free(vars);
 }
 
-void printLaTeXTbl(void) {
+void printLaTeXTbl(symbol** vars, int varno) {
  int i;
  fputs("\\begin{tabular}{", stdout);
  for (i=0; i < varno + stmntQty; i++) {
-  if (i) putchar('|'); putchar('c');
+  if (i) putchar('|');
+  putchar('c');
  }
  fputs("}\n", stdout);
  for (i=0; i<varno; i++) {
@@ -79,126 +88,7 @@ void printLaTeXTbl(void) {
  fputs("\\end{tabular}\n", stdout);
 }
 
-void printTeXExp(expr* ex) {
- if (!ex) return; /* Do something else? */
- if (ex->paren) putchar('(');
- switch (ex->oper) {
-  case 0: putchar(ex->sym->c); break;
-  case NOT: fputs("\\neg ", stdout); printTeXExp(ex->args[0]); break;
-  case AND: 
-   printTeXExp(ex->args[0]); fputs(" \\wedge ", stdout);
-   printTeXExp(ex->args[1]); break;
-  case OR:
-   printTeXExp(ex->args[0]); fputs(" \\vee ", stdout);
-   printTeXExp(ex->args[1]); break;
-  case XOR:
-   printTeXExp(ex->args[0]); fputs(" \\dot{\\vee} ", stdout);
-   printTeXExp(ex->args[1]); break;
-  case THEN:
-   printTeXExp(ex->args[0]); fputs(" \\rightarrow ", stdout);
-   printTeXExp(ex->args[1]); break;
-  case EQ:
-   printTeXExp(ex->args[0]); fputs(" \\leftrightarrow ", stdout);
-   printTeXExp(ex->args[1]); break;
-  case ':':
-   putchar(ex->sym->c); fputs("\\>:\\>", stdout);
-   printTeXExp(ex->args[0]); break;
-  default: return; /* And/or do something else? */
- }
- if (ex->paren) putchar(')');
-}
-
-int exprLength(expr* ex) { /* Probably needs improvement */
- if (!ex) return 0;
- switch (ex->oper) {
-  case 0: return 1 + 2 * ex->paren;
-  case NOT: return 1 + exprLength(ex->args[0]) + 2 * ex->paren;
-  case AND: case OR: case XOR:
-   return 1 + exprLength(ex->args[0]) + exprLength(ex->args[1]) + 2 * ex->paren;
-  case THEN:
-   return 2 + exprLength(ex->args[0]) + exprLength(ex->args[1]) + 2 * ex->paren;
-  case EQ:
-   return 3 + exprLength(ex->args[0]) + exprLength(ex->args[1]) + 2 * ex->paren;
-  case ':': return 4 + exprLength(ex->args[0]);
-  default: return 0;
- }
-}
-
-void printTxtTbl(void) {
- int i;
- for (i=0; i<varno; i++) {if (i) putchar('|'); putchar(vars[i]->c); }
- int* stmntLen = calloc(stmntQty, sizeof(int));
- checkMem(stmntLen);
- i=0;
- for (expr* ex = statements; ex != NULL; ex = ex->next) {
-  putchar('|');
-  printTxtExp(ex);
-  stmntLen[i++] = exprLength(ex);
-  /* Should printTxtExp() return the length instead? */
- }
- putchar('\n');
- for (i=0; i<varno; i++) {if (i) putchar('|'); putchar('-'); }
- for (i=0; i<stmntQty; i++) {
-  putchar('|');
-  for (int j=0; j<stmntLen[i]; j++) putchar('-');
- }
- putchar('\n');
- do {
-  for (i=0; i<varno; i++) {
-   if (i) putchar('|');
-   putchar(vars[i]->truth ? 'T' : 'F');
-  }
-  i=0;
-  for (expr* ex = statements; ex != NULL; ex = ex->next) {
-   putchar('|');
-   int j, len = stmntLen[i]/2 - !(stmntLen[i] % 2);
-   for (j=0; j<len; j++) putchar(' ');
-   putchar(evalExpr(ex) ? 'T' : 'F');
-   len += !(stmntLen[i] % 2);
-   if (ex->next) for (j=0; j<len; j++) putchar(' ');
-   i++;
-  }
-  putchar('\n');
-  for (i=varno-1; i>=0; i--) if (!(vars[i]->truth = !(vars[i]->truth))) break;
- } while (i >= 0);
-}
-
-void printTxtExp(expr* ex) {
- if (!ex) return; /* Do something else? */
- if (ex->paren) putchar('(');
- switch (ex->oper) {
-  case 0: putchar(ex->sym->c); break;
-  case NOT: putchar('-'); printTxtExp(ex->args[0]); break;
-  case AND:
-   printTxtExp(ex->args[0]); putchar('^'); printTxtExp(ex->args[1]); break;
-  case OR:
-   printTxtExp(ex->args[0]); putchar('v'); printTxtExp(ex->args[1]); break;
-  case XOR:
-   printTxtExp(ex->args[0]); putchar('x'); printTxtExp(ex->args[1]); break;
-  case THEN:
-   printTxtExp(ex->args[0]); fputs("->", stdout);
-   printTxtExp(ex->args[1]); break;
-  case EQ:
-   printTxtExp(ex->args[0]); fputs("<->", stdout);
-   printTxtExp(ex->args[1]); break;
-  case ':':
-   putchar(ex->sym->c); fputs(" : ", stdout); printTxtExp(ex->args[0]); break;
-  default: return; /* And/or do something else? */
- }
- if (ex->paren) putchar(')');
-}
-
-void printDocTop(void) {
- if (flags.tblType == latexTbl)
-  puts("\\documentclass{article}\n\\begin{document}\n\\begin{center}");
-}
-
-void printDocEnd(void) {
- if (flags.tblType == latexTbl) puts("\\end{center}\n\\end{document}");
- else if (flags.tblType == texTbl) puts("\\bye");
-}
-
-void printTeXTbl(void) {
+void printTeXTbl(symbol** vars, int varno) {
  int i;
  fputs("$$\\vbox{\\offinterlineskip\\halign{\n\\strut", stdout);
  for (i=0; i < varno + stmntQty; i++) {
@@ -231,4 +121,98 @@ void printTeXTbl(void) {
   for (i=varno-1; i>=0; i--) if (!(vars[i]->truth = !(vars[i]->truth))) break;
  } while (i >= 0);
  fputs("}}$$\n", stdout);
+}
+
+void printTeXExp(expr* ex) {
+ if (!ex) return; /* Do something else? */
+ if (ex->paren) putchar('(');
+ char* binOp = NULL;
+ switch (ex->oper) {
+  case 0: putchar(ex->sym->c); break;
+  case NOT: fputs("\\neg ", stdout); printTeXExp(ex->args[0]); break;
+  case AND: binOp = " \\wedge "; break;
+  case OR: binOp = " \\vee "; break;
+  case XOR: binOp = " \\dot{\\vee} "; break;
+  case THEN: binOp = " \\rightarrow "; break;
+  case EQ: binOp = " \\leftrightarrow "; break;
+  case ':':
+   putchar(ex->sym->c);
+   fputs("\\>:\\>", stdout);
+   printTeXExp(ex->args[0]);
+   break;
+  default: return; /* And/or do something else? */
+ }
+ if (binOp != NULL) {
+  printTeXExp(ex->args[0]);
+  fputs(binOp, stdout);
+  printTeXExp(ex->args[1]);
+ }
+ if (ex->paren) putchar(')');
+}
+
+void printTxtTbl(symbol** vars, int varno) {
+ int i;
+ for (i=0; i<varno; i++) {if (i) putchar('|'); putchar(vars[i]->c); }
+ int* stmntLen = calloc(stmntQty, sizeof(int));
+ checkMem(stmntLen);
+ i=0;
+ for (expr* ex = statements; ex != NULL; ex = ex->next) {
+  putchar('|');
+  stmntLen[i++] = printTxtExp(ex);
+ }
+ putchar('\n');
+ for (i=0; i<varno; i++) {if (i) putchar('|'); putchar('-'); }
+ for (i=0; i<stmntQty; i++) {
+  putchar('|');
+  for (int j=0; j<stmntLen[i]; j++) putchar('-');
+ }
+ putchar('\n');
+ do {
+  for (i=0; i<varno; i++) {
+   if (i) putchar('|');
+   putchar(vars[i]->truth ? 'T' : 'F');
+  }
+  i=0;
+  for (expr* ex = statements; ex != NULL; ex = ex->next) {
+   putchar('|');
+   int j, len = stmntLen[i]/2 - !(stmntLen[i] % 2);
+   for (j=0; j<len; j++) putchar(' ');
+   putchar(evalExpr(ex) ? 'T' : 'F');
+   len += !(stmntLen[i] % 2);
+   if (ex->next) for (j=0; j<len; j++) putchar(' ');
+   i++;
+  }
+  putchar('\n');
+  for (i=varno-1; i>=0; i--) if (!(vars[i]->truth = !(vars[i]->truth))) break;
+ } while (i >= 0);
+}
+
+int printTxtExp(expr* ex) {
+ if (!ex) return 0; /* Do something else? */
+ int len = ex->paren ? 2 : 0;
+ if (ex->paren) putchar('(');
+ char* binOp = NULL;
+ switch (ex->oper) {
+  case 0: putchar(ex->sym->c); len++; break;
+  case NOT: putchar('-'); len += 1 + printTxtExp(ex->args[0]); break;
+  case AND: binOp = "^"; break;
+  case OR: binOp = "v"; break;
+  case XOR: binOp = "x"; break;
+  case THEN: binOp = "->"; break;
+  case EQ: binOp = "<->"; break;
+  case ':':
+   putchar(ex->sym->c);
+   fputs(" : ", stdout);
+   len += 4 + printTxtExp(ex->args[0]);
+   break;
+  default: return len; /* And/or do something else? */
+ }
+ if (binOp != NULL) {
+  len += printTxtExp(ex->args[0]);
+  len += strlen(binOp);
+  fputs(binOp, stdout);
+  len += printTxtExp(ex->args[1]);
+ }
+ if (ex->paren) putchar(')');
+ return len;
 }

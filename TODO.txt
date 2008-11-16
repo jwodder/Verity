@@ -3,8 +3,6 @@ VERITY TO-DO
 - Update the copyright dates to include 2008
 - Include a version history in the README
 - Implement (Embedded?) PostScript output
-- Improve the code?  (I seem to recall it needing improvements)
- - Improve veriprint.c
 - Rewrite yyerror() to print out the input line number
 - When this is all done, update the version number & release a new version
 - Rewrite checkMem() to call yyerror()?
