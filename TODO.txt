@@ -1,11 +1,19 @@
 VERITY TO-DO
-- Replace all occurrences of my SourceForge e-mail address with my SDF address
-- Update the copyright dates to include 2008
-- Include a version history in the README
-- Implement (Embedded?) PostScript output
-- Rewrite yyerror() to print out the input line number
-- When this is all done, update the version number & release a new version
-- Rewrite checkMem() to call yyerror()?
-- Document the fact that comments don't constitute statement delimiters (or
-  should they?)
-- Make commas valid statement delimiters?
+Features:
+ - Add an option to output UTF-8 operator symbols in plain text mode?
+ - Implement (Embedded?) PostScript output
+ - Make commas valid statement delimiters?
+ - Implement error recovery up to the next EOL (though symbols that are only
+   referenced in erroneous rules will need to be dealt with...)
+ - Allow multi-block files to alternate between braces-enclosed statements and
+   unenclosed statements (maybe)
+ - Add a "<-" operator?
+
+Documentation:
+ - Note in the README that Bison is required for compiling
+
+Other:
+ - Make sure that the line numbering works completely accurately
+ - When this is all done, update the version number to 1.3 & release it
+  - Make sure that the date for v.1.3 in the README's history is accurate
+ - Sort variables in the tables in alphabetical order?

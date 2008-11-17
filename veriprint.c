@@ -1,5 +1,5 @@
 /* Verity - generates truth tables of logical statements
-   Copyright (C) 2007 John T. Wodder II
+   Copyright (C) 2007, 2008 John T. Wodder II
 
    This file is part of Verity.
 

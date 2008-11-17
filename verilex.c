@@ -38,54 +38,77 @@ int yylex(void) {
   yyerror("error reading input: %s", strerror(errno));
   exit(3);
  }
- int ch;
  for (;;) {
-  switch (ch = fgetc(yyin)) {
+  int ch = fgetc(yyin);
+  yylloc.first_column++;
+  switch (ch) {
    case '^': return AND;
    case '&':
     ch = fgetc(yyin);
     if (ch != '&') ungetc(ch, yyin);
+    else yylloc.first_column++;
     return AND;
    case 'v': return OR;
    case '|':
     ch = fgetc(yyin);
     if (ch != '|') ungetc(ch, yyin);
+    else yylloc.first_column++;
     return OR;
    case 'x': case 'X': return XOR;
    case '-': 
     ch = fgetc(yyin);
-    if (ch == '>') return THEN;
+    if (ch == '>') {yylloc.first_column++; return THEN; }
     else ungetc(ch, yyin);  /* ... and then fall through */
    case '!': case '~': return NOT;
    case '<':
     ch = fgetc(yyin);
+    yylloc.first_column++;
     if (ch == '-') {
      ch = fgetc(yyin);
+     yylloc.first_column++;
      if (ch == '>') return EQ;
      else if (ch == EOF) {
       yyerror("unexpected end of file while reading token");
       exit(3);
+      /* Even though yyerror() calls exit() itself, exit() is explicitly called
+       * here & throughout the program just in case the call is later removed
+       * from yyerror() and I forget to amend all the invocations. */
      } else {yyerror("malformed symbol \"<-%c\"", ch); exit(3); }
     } else if (ch == EOF) {
      yyerror("unexpected end of file while reading token");
      exit(3);
     } else {yyerror("malformed symbol \"<%c\"", ch); exit(3); }
    case ':': case '(': case ')': case '{': case '}': return ch;
-   case ';': case '\n': return EOL;
+   case '\n':
+    yylloc.first_line++;
+    yylloc.first_column = 0;
+    /* and fall through */
+   case ';':
+    return EOL;
    case '#':
-    while (ch != '\n' && ch != EOF) ch = fgetc(yyin);
+    while (ch != '\n' && ch != EOF) {ch = fgetc(yyin); yylloc.first_column++; }
     if (ferror(yyin)) {
      yyerror("error reading input: %s", strerror(errno));
      exit(3);
     }
+    yylloc.first_line++;
+    yylloc.first_column = 0;
     break;
    case '\\':
     ch = fgetc(yyin);
-    if (ch == '\n') break;
-    else if (ch == EOF) {
+    yylloc.first_column++;
+    if (ch == '\n') {
+     yylloc.first_line++;
+     yylloc.first_column = 0;
+     break;
+    } else if (ch == EOF) {
+     if (ferror(yyin)) {
+      yyerror("error reading input: %s", strerror(errno));
+      exit(3);
+     }
      fprintf(stderr, "verity: warning: invalid backslash before end-of-file\n");
      return 0;
-    } else if (ch == 'x' || ch == 'X' || ch == 'v' || ch == 'V') {
+    } else if (isalpha(ch)) {
      yylval.sym = getSym(ch);
      return SYM;
     } else {yyerror("invalid escape sequence \"\\%c\"", ch); exit(3); }

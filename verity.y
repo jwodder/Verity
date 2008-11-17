@@ -1,5 +1,5 @@
 /* Verity - generates truth tables of logical statements
-   Copyright (C) 2007 John T. Wodder II
+   Copyright (C) 2007, 2008 John T. Wodder II
 
    This file is part of Verity.
 
@@ -34,6 +34,9 @@ struct {
  _Bool eval : 1, standalone : 1;
 } flags = {0};
 %}
+
+%locations
+%error-verbose
 
 %union {symbol* sym; expr* stmnt; }
 %token <sym> SYM
@@ -79,12 +82,14 @@ expr: SYM  {$$ = symExpr($1); }
 %%
 
 void yyerror(char* s, ...) {
- fprintf(stderr, "verity: ");
+ fprintf(stderr, "verity: line %d, col. %d: ", yylloc.first_line,
+  yylloc.first_column);
  va_list arg;
  va_start(arg, s);
  vfprintf(stderr, s, arg);
  va_end(arg);
  fputc('\n', stderr);
+ if (flags.standalone) printDocEnd();
  exit(3);
 }
 
@@ -117,7 +122,7 @@ int main(int argc, char** argv) {
    case 's': flags.standalone = 1; break;
    case 'V':
     printf("Verity, a truth table generator, v.1.2.1\n"
-     "Written by John T. Wodder II (minimiscience@users.sourceforge.net)\n"
+     "Written by John T. Wodder II (jwodder@sdf.lonestar.org)\n"
      "Compiled %s, %s\n"
      "Verity is distributed under the GNU General Public License v.3\n"
      "Type `man verity' or `verity -h' for help\n",

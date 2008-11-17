@@ -12,7 +12,7 @@ B<verity> [B<-h> | B<-V>]
 
 =head1 DESCRIPTION
 
-B<Verity> is a utility for generating the truth tables for sets of logical
+B<Verity> is a utility for generating truth tables for sets of logical
 statements.  Output can be as plain text, a TeX table, or a LaTeX I<tabular>
 environment.  The statements can be read from the standard input or an
 I<infile> or simply passed to B<Verity> on the command line as the argument to
@@ -26,17 +26,18 @@ L</"STATEMENT SYNTAX">.
 =item B<-e> I<statements>
 
 B<Verity> treats I<statements>, along with the arguments of any following B<-e>
-switches, as newline-terminated input.  If an infile is specified on the
+switches, as newline-terminated input.  If I<infile> is also specified on the
 command line, it is ignored.
 
 =item B<-h>
 
-Display a summary of command-line options and exit.
+Display a summary of the command-line options and exit.
 
 =item B<-l>
 
-Output is in the form of LaTeX I<tabular> environments.  If the B<-s> option is
-also specified, the tabulars are centered.
+Output is in the form of LaTeX C<tabular> environments.  If the B<-s> option is
+also specified, the tabulars are centered.  The B<-l> option overrides any
+previous B<-p> or B<-t> options.
 
 =item B<-o> I<outfile>
 
@@ -55,7 +56,8 @@ effect on plain text tables.
 
 =item B<-t>
 
-Output is in the form of centered TeX tables.
+Output is in the form of centered TeX tables.  The B<-t> option overrides any
+previous B<-l> or B<-p> options.
 
 =item B<-V>
 
@@ -65,30 +67,36 @@ Display version information & exit
 
 =head1 STATEMENT SYNTAX
 
-Statements consist of letters (other than C<v>, C<x>, and C<X>), representing
-boolean variables, combined with logical AND (C<^>, C<&>, or C<&&>), logical
-inclusive OR (C<v>, C<|>, or C<||>), and/or logical exclusive OR (C<x> or
-C<X>).  Statements may be grouped within parentheses and negated with C<->,
-C<!>, or C<~>.  They may also be combined with C<< -> >>, which results in a
-statement which is false if & only if the left statement is true & the right
-statement false, and C<< <-> >>, which creates a statement which is true if and
-only if both the left & right statements have the same boolean value.
-Parentheses and the negation operator have the highest & second highest
-precedence, respectively, followed by the AND, OR, and XOR operators, then C<<
--> >>, and finally C<< <-> >>.  All binary operators are left-associative.
+Statements consist of individual letters (considered case-sensitively)
+representing boolean variables and combined with logical AND (C<^>, C<&>, or
+C<&&>), logical inclusive OR (C<v>, C<|>, or C<||>), and/or logical exclusive
+OR (C<x> or C<X>) to form logical expressions.  (In order to use a variable
+named C<x>, C<X>, or C<v>, the letter must be preceded by a backslash.)
+Statements may be grouped within parentheses and negated with C<->, C<!>, or
+C<~>.  They may also be combined with C<< -> >>, which results in a statement
+which is false if & only if the left statement is true & the right statement
+false, and C<< <-> >>, which creates a statement which is true if & only if
+both the left & right statements have the same boolean value.  Parentheses and
+the negation operator have the highest & second highest precedence,
+respectively, followed by the AND, OR, and XOR operators, then C<< -> >>, and
+finally C<< <-> >>.  All binary operators are left-associative.
 
-Statements are separated by semicolons or newlines, and all statements listed
-in the input file are output in the resulting truth table.  There is no need to
-list the variables explicitly, as any variables used will be automatically
-placed at the left end of the table in the order in which they appear in the
-statements.  The truth value of a specific statement can be assigned to a
-variable by prefixing the statement with the variable, followed by a colon.
+Statements are delimited by semicolons or newlines (though a backslash at the
+end of a line causes the newline to be ignored, thus letting a single statement
+continue over multiple lines), and all statements listed in the input file are
+output in the resulting truth table.  There is no need to list the variables
+explicitly, as any variables used will be automatically placed at the left end
+of the table in the order in which they appear in the file.  A variable can
+have the truth value of a specific statement assigned to it by prefixing the
+statement with the variable followed by a colon.
 
 Multiple tables can be output by grouping the statements for each table between
-braces.
+braces.  The set of variables to output will be reset for each table.
 
 Comments can also be inserted into the input, beginning with a pound sign
-(C<#>) and continuing to the end of the line.
+(C<#>) and continuing to the end of the line.  The end of a line in a comment
+does not constitute a statement delimiter, so a semicolon or extra newline is
+required if a new statement is to immediately follow.
 
 =head1 EXAMPLES
 
@@ -111,9 +119,9 @@ that the statement C<p v -q> is assigned to the variable C<S> for ease of
 reference in the statement after it.
 
     -p x q
-    S : p v -q
-    S -> q^r
-    pvr <-> -(-p^-r)
+    S : p || -q
+    S -> q&r
+    pvr <-> !(~p ^ ~r)
 
 When input to B<Verity>, the above statements yield the truth table:
 
@@ -132,7 +140,8 @@ When input to B<Verity>, the above statements yield the truth table:
 
 Assignment of statements to variables with the colon operator should be done
 before the variable is used in any other statements.  Otherwise, the behavior
-is undefined.
+is undefined.  Similarly, assigning more than one statement to the same
+variable also leads to undefined behavior.
 
 =head1 NOTES
 
@@ -142,11 +151,11 @@ changing it to something more well-known.
 
 =head1 AUTHOR
 
-John T. Wodder II <minimiscience@users.sourceforge.net>
+John T. Wodder II <jwodder@sdf.lonestar.org>
 
 =head1 COPYRIGHT
 
-Copyright 2007 by John T. Wodder II
+Copyright 2007, 2008 by John T. Wodder II
 
 Verity is distributed under the GNU General Public License, v.3.0 or later.
 There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR

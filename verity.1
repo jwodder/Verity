@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "VERITY 1"
-.TH VERITY 1 "2008-11-11" "Version 1.2.1" ""
+.TH VERITY 1 "2008-11-16" "Version 1.3" ""
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -138,7 +138,7 @@
 \&\fBverity\fR [\fB\-h\fR | \fB\-V\fR]
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
-\&\fBVerity\fR is a utility for generating the truth tables for sets of logical
+\&\fBVerity\fR is a utility for generating truth tables for sets of logical
 statements.  Output can be as plain text, a TeX table, or a LaTeX \fItabular\fR
 environment.  The statements can be read from the standard input or an
 \&\fIinfile\fR or simply passed to \fBVerity\fR on the command line as the argument to
@@ -149,15 +149,16 @@ an \fB\-e\fR flag.  The syntax for the statements is descriped below under
 .IP "\fB\-e\fR \fIstatements\fR" 4
 .IX Item "-e statements"
 \&\fBVerity\fR treats \fIstatements\fR, along with the arguments of any following \fB\-e\fR
-switches, as newline-terminated input.  If an infile is specified on the
+switches, as newline-terminated input.  If \fIinfile\fR is also specified on the
 command line, it is ignored.
 .IP "\fB\-h\fR" 4
 .IX Item "-h"
-Display a summary of command-line options and exit.
+Display a summary of the command-line options and exit.
 .IP "\fB\-l\fR" 4
 .IX Item "-l"
-Output is in the form of LaTeX \fItabular\fR environments.  If the \fB\-s\fR option is
-also specified, the tabulars are centered.
+Output is in the form of LaTeX \f(CW\*(C`tabular\*(C'\fR environments.  If the \fB\-s\fR option is
+also specified, the tabulars are centered.  The \fB\-l\fR option overrides any
+previous \fB\-p\fR or \fB\-t\fR options.
 .IP "\fB\-o\fR \fIoutfile\fR" 4
 .IX Item "-o outfile"
 Output is written to file \fIoutfile\fR.
@@ -172,35 +173,43 @@ fragment suitable for importing into another document.  This option has no
 effect on plain text tables.
 .IP "\fB\-t\fR" 4
 .IX Item "-t"
-Output is in the form of centered TeX tables.
+Output is in the form of centered TeX tables.  The \fB\-t\fR option overrides any
+previous \fB\-l\fR or \fB\-p\fR options.
 .IP "\fB\-V\fR" 4
 .IX Item "-V"
 Display version information & exit
 .SH "STATEMENT SYNTAX"
 .IX Header "STATEMENT SYNTAX"
-Statements consist of letters (other than \f(CW\*(C`v\*(C'\fR, \f(CW\*(C`x\*(C'\fR, and \f(CW\*(C`X\*(C'\fR), representing
-boolean variables, combined with logical \s-1AND\s0 (\f(CW\*(C`^\*(C'\fR, \f(CW\*(C`&\*(C'\fR, or \f(CW\*(C`&&\*(C'\fR), logical
-inclusive \s-1OR\s0 (\f(CW\*(C`v\*(C'\fR, \f(CW\*(C`|\*(C'\fR, or \f(CW\*(C`||\*(C'\fR), and/or logical exclusive \s-1OR\s0 (\f(CW\*(C`x\*(C'\fR or
-\&\f(CW\*(C`X\*(C'\fR).  Statements may be grouped within parentheses and negated with \f(CW\*(C`\-\*(C'\fR,
-\&\f(CW\*(C`!\*(C'\fR, or \f(CW\*(C`~\*(C'\fR.  They may also be combined with \f(CW\*(C`\->\*(C'\fR, which results in a
-statement which is false if & only if the left statement is true & the right
-statement false, and \f(CW\*(C`<\->\*(C'\fR, which creates a statement which is true if and
-only if both the left & right statements have the same boolean value.
-Parentheses and the negation operator have the highest & second highest
-precedence, respectively, followed by the \s-1AND\s0, \s-1OR\s0, and \s-1XOR\s0 operators, then \f(CW\*(C`\->\*(C'\fR, and finally \f(CW\*(C`<\->\*(C'\fR.  All binary operators are left-associative.
+Statements consist of individual letters (considered case-sensitively)
+representing boolean variables and combined with logical \s-1AND\s0 (\f(CW\*(C`^\*(C'\fR, \f(CW\*(C`&\*(C'\fR, or
+\&\f(CW\*(C`&&\*(C'\fR), logical inclusive \s-1OR\s0 (\f(CW\*(C`v\*(C'\fR, \f(CW\*(C`|\*(C'\fR, or \f(CW\*(C`||\*(C'\fR), and/or logical exclusive
+\&\s-1OR\s0 (\f(CW\*(C`x\*(C'\fR or \f(CW\*(C`X\*(C'\fR) to form logical expressions.  (In order to use a variable
+named \f(CW\*(C`x\*(C'\fR, \f(CW\*(C`X\*(C'\fR, or \f(CW\*(C`v\*(C'\fR, the letter must be preceded by a backslash.)
+Statements may be grouped within parentheses and negated with \f(CW\*(C`\-\*(C'\fR, \f(CW\*(C`!\*(C'\fR, or
+\&\f(CW\*(C`~\*(C'\fR.  They may also be combined with \f(CW\*(C`\->\*(C'\fR, which results in a statement
+which is false if & only if the left statement is true & the right statement
+false, and \f(CW\*(C`<\->\*(C'\fR, which creates a statement which is true if & only if
+both the left & right statements have the same boolean value.  Parentheses and
+the negation operator have the highest & second highest precedence,
+respectively, followed by the \s-1AND\s0, \s-1OR\s0, and \s-1XOR\s0 operators, then \f(CW\*(C`\->\*(C'\fR, and
+finally \f(CW\*(C`<\->\*(C'\fR.  All binary operators are left-associative.
 .PP
-Statements are separated by semicolons or newlines, and all statements listed
-in the input file are output in the resulting truth table.  There is no need to
-list the variables explicitly, as any variables used will be automatically
-placed at the left end of the table in the order in which they appear in the
-statements.  The truth value of a specific statement can be assigned to a
-variable by prefixing the statement with the variable, followed by a colon.
+Statements are delimited by semicolons or newlines (though a backslash at the
+end of a line causes the newline to be ignored, thus letting a single statement
+continue over multiple lines), and all statements listed in the input file are
+output in the resulting truth table.  There is no need to list the variables
+explicitly, as any variables used will be automatically placed at the left end
+of the table in the order in which they appear in the file.  A variable can
+have the truth value of a specific statement assigned to it by prefixing the
+statement with the variable followed by a colon.
 .PP
 Multiple tables can be output by grouping the statements for each table between
-braces.
+braces.  The set of variables to output will be reset for each table.
 .PP
 Comments can also be inserted into the input, beginning with a pound sign
-(\f(CW\*(C`#\*(C'\fR) and continuing to the end of the line.
+(\f(CW\*(C`#\*(C'\fR) and continuing to the end of the line.  The end of a line in a comment
+does not constitute a statement delimiter, so a semicolon or extra newline is
+required if a new statement is to immediately follow.
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
 The following line causes \fBVerity\fR to output the combined truth table for the
@@ -227,9 +236,9 @@ reference in the statement after it.
 .PP
 .Vb 4
 \&    \-p x q
-\&    S : p v \-q
-\&    S \-> q^r
-\&    pvr <\-> \-(\-p^\-r)
+\&    S : p || \-q
+\&    S \-> q&r
+\&    pvr <\-> !(~p ^ ~r)
 .Ve
 .PP
 When input to \fBVerity\fR, the above statements yield the truth table:
@@ -250,7 +259,8 @@ When input to \fBVerity\fR, the above statements yield the truth table:
 .IX Header "RESTRICTIONS"
 Assignment of statements to variables with the colon operator should be done
 before the variable is used in any other statements.  Otherwise, the behavior
-is undefined.
+is undefined.  Similarly, assigning more than one statement to the same
+variable also leads to undefined behavior.
 .SH "NOTES"
 .IX Header "NOTES"
 The symbol used for \s-1XOR\s0 in (La)TeX output \*(-- that of \s-1OR\s0 with a dot drawn above
@@ -258,10 +268,10 @@ it \*(-- is not the most common symbol for the operation, and I am considering
 changing it to something more well-known.
 .SH "AUTHOR"
 .IX Header "AUTHOR"
-John T. Wodder \s-1II\s0 <minimiscience@users.sourceforge.net>
+John T. Wodder \s-1II\s0 <jwodder@sdf.lonestar.org>
 .SH "COPYRIGHT"
 .IX Header "COPYRIGHT"
-Copyright 2007 by John T. Wodder \s-1II\s0
+Copyright 2007, 2008 by John T. Wodder \s-1II\s0
 .PP
 Verity is distributed under the \s-1GNU\s0 General Public License, v.3.0 or later.
 There is \s-1NO\s0 warranty; not even for \s-1MERCHANTABILITY\s0 or \s-1FITNESS\s0 \s-1FOR\s0 A \s-1PARTICULAR\s0

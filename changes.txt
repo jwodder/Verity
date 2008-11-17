@@ -1,3 +1,4 @@
-CHANGES MADE IN VERSION 1.2.2
-- Variables named '[vVxX]' may be used by preceding them with backslashes
+CHANGES MADE IN VERSION 1.3
+- Variables named '[vxX]' may be used by preceding them with backslashes
 - Empty files/files containing only whitespace are no longer valid input
+- Code significantly improved

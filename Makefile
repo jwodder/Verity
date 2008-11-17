@@ -15,6 +15,6 @@ verity.tab.c verity.tab.h : verity.y
 	bison -d verity.y
 
 verity.1 : verity.pod
-	pod2man -c '' -r 'Version 1.2.1' verity.pod verity.1
+	pod2man -c '' -r 'Version 1.3' verity.pod verity.1
 clear :
 	-rm -f *.o verity.tab.[ch]
