@@ -46,6 +46,9 @@ veritypes.h - the header file for veritypes.c
  - Empty files & files containing only whitespace are no longer valid input
  - Code significantly improved
  - '|' now accepted as an alternative for 'v' and "||"
+ - Location tracking implemented for error messages; Bison (not Yacc) now
+   required for compiling
+ - Syntax error messages made more descriptive; Bison now required even more
 
 
 $Id$
