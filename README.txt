@@ -39,7 +39,7 @@ veritypes.h - the header file for veritypes.c
 
 3. VERSION HISTORY
 
-??? - v.1.3:
+22 Nov 2008 - v.1.3:
  - Version history started
  - Variables named 'x', 'X', or 'v' may now be used by preceding them with
    backslashes

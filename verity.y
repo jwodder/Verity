@@ -126,15 +126,15 @@ int main(int argc, char** argv) {
     printf("Usage: verity [-P | -p | -t | -l] [-s] [-o outfile] [-e statements"
      " | infile]\n       verity [-h | -V]\n\n"
      "Options:\n"
-     "  -e  Treat statements as input\n"
-     "  -h  Print this summary of command-line options and exit\n"
-     "  -l  Output a LaTeX tabular\n"
-     "  -o  Write output to `outfile'\n"
-     "  -P  Output a PostScript document\n"
-     "  -p  Output plain text\n"
-     "  -s  Output a complete Tex/LaTeX document\n"
-     "  -t  Output a TeX table\n"
-     "  -V  Print version information and exit\n");
+     "  -e statements - Treat `statements' as input\n"
+     "  -h - Print this summary of command-line options and exit\n"
+     "  -l - Output a LaTeX tabular\n"
+     "  -o outfile - Write output to `outfile'\n"
+     "  -P - Output a PostScript document\n"
+     "  -p - Output plain text\n"
+     "  -s - Output a complete Tex/LaTeX document\n"
+     "  -t - Output a TeX table\n"
+     "  -V - Print version information and exit\n");
     return 0;
    default:
     fprintf(stderr, "Usage: verity [-P | -p | -t | -l] [-s] [-o outfile] [-e"

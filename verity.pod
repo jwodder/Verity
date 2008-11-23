@@ -44,11 +44,11 @@ Output is written to file I<outfile>.
 
 =item B<-P>
 
-Output the table(s) as a PostScript document.
+Output the tables as a single PostScript document.
 
 =item B<-p>
 
-Output the table(s) as plain text.  This is the default.
+Output is as plain text.  This is the default.
 
 =item B<-s>
 
@@ -81,6 +81,7 @@ true if & only if both the left & right statements have the same boolean value.
 Parentheses and the negation operator have the highest & second highest
 precedence, respectively, followed by the AND, OR, and XOR operators, then C<<
 -> >>, and finally C<< <-> >>.  All binary operators are left-associative.
+Whitespace (other than newlines) is ignored.
 
 Statements are delimited by semicolons or newlines (though a backslash at the
 end of a line causes the newline to be ignored, thus letting a single statement
@@ -116,7 +117,7 @@ As plain text, the output for the above is:
     F|F| F | F
 
 For a somewhat more complex example, consider the following statements.  Note
-that the statement C<p v -q> is assigned to the variable C<S> for ease of
+that the statement C<p || -q> is assigned to the variable C<S> for ease of
 reference in the statement after it.
 
     -p x q
@@ -165,7 +166,7 @@ John T. Wodder II <jwodder@sdf.lonestar.org>
 
 Copyright 2007, 2008 by John T. Wodder II
 
-Verity is distributed under the GNU General Public License, v.3.0 or later.
+B<Verity> is distributed under the GNU General Public License, v.3.0 or later.
 There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR
 PURPOSE.
 

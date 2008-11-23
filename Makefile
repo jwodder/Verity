@@ -1,6 +1,7 @@
 # $Id$
 
 OBJS = verity.tab.o verilex.o veritypes.o veriprint.o
+CC = c99
 CFLAGS = -O2
 
 .PHONY : all clear
