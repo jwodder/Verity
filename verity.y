@@ -30,7 +30,7 @@ int yylex(void);
 extern FILE* yyin;
 
 struct {
- enum {txtTbl=0, latexTbl, texTbl} tblType;
+ enum {txtTbl=0, latexTbl, texTbl, psTbl} tblType;
  _Bool eval : 1, standalone : 1;
 } flags = {0};
 %}
@@ -95,7 +95,7 @@ void yyerror(char* s, ...) {
 
 int main(int argc, char** argv) {
  int opt;
- while ((opt = getopt(argc, argv, "o:plte:sVh")) != -1) {
+ while ((opt = getopt(argc, argv, "o:plte:sVhP")) != -1) {
   switch (opt) {
    case 'o':
     if (freopen(optarg, "w", stdout) == NULL) {
@@ -107,6 +107,7 @@ int main(int argc, char** argv) {
    case 'p': flags.tblType = txtTbl; break;
    case 'l': flags.tblType = latexTbl; break;
    case 't': flags.tblType = texTbl; break;
+   case 'P': flags.tblType = psTbl; break;
    case 'e':
     if (!flags.eval) {
      flags.eval = 1;
@@ -129,20 +130,21 @@ int main(int argc, char** argv) {
      __DATE__, __TIME__);
     return 0;
    case 'h':
-    printf("Usage: verity [-p | -t | -l] [-s] [-o outfile] [-e statements |"
-     " infile]\n       verity [-h | -V]\n\n"
+    printf("Usage: verity [-P | -p | -t | -l] [-s] [-o outfile] [-e statements"
+     " | infile]\n       verity [-h | -V]\n\n"
      "Options:\n"
      "  -e  Treat statements as input\n"
      "  -h  Print this summary of command-line options and exit\n"
      "  -l  Output a LaTeX tabular\n"
      "  -o  Write output to `outfile'\n"
+     "  -P  Output PostScript\n"
      "  -p  Output plain text\n"
      "  -s  Output a complete Tex/LaTeX document\n"
      "  -t  Output a TeX table\n"
      "  -V  Print version information and exit\n");
     return 0;
    default:
-    fprintf(stderr, "Usage: verity [-p | -t | -l] [-s] [-o outfile] [-e"
+    fprintf(stderr, "Usage: verity [-P | -p | -t | -l] [-s] [-o outfile] [-e"
      " statements | infile]\n       verity [-h | -V]\n");
     return 2;
   }

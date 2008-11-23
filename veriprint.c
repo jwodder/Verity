@@ -26,18 +26,33 @@
 #include "verity.tab.h"
 
 extern struct {
- enum {txtTbl=0, latexTbl, texTbl} tblType;
+ enum {txtTbl=0, latexTbl, texTbl, psTbl} tblType;
  _Bool eval, standalone : 1;
 } flags;
 
 void printDocTop(void) {
  if (flags.tblType == latexTbl)
   puts("\\documentclass{article}\n\\begin{document}\n\\begin{center}");
+ else if (flags.tblType == psTbl) {
+  puts("%!PS-Adobe-3.0\n"
+   "/fontSize 12 def\n"
+   "/varFont /Times-Italic findfont fontSize scalefont def\n"
+   "varFont setfont /em (M) stringwidth pop def\n"
+   "/TPad em (T) stringwidth pop sub 2 div def\n"
+   "/FPad em (F) stringwidth pop sub 2 div def\n"
+   "/barPad em 8 div def\n"
+   /* barPad = padding on each side of table bars, including half the width of
+    * the bars */
+   "/symFont /Symbol findfont fontSize scalefont def\n"
+   "72 720 fontSize 1.2 mul add moveto\n"
+  );
+ }
 }
 
 void printDocEnd(void) {
  if (flags.tblType == latexTbl) puts("\\end{center}\n\\end{document}");
  else if (flags.tblType == texTbl) puts("\\bye");
+ else if (flags.tblType == psTbl) puts("showpage");
 }
 
 void printTbl(void) {
@@ -50,6 +65,7 @@ void printTbl(void) {
   case latexTbl: printLaTeXTbl(vars, varno); break;
   case texTbl: printTeXTbl(vars, varno); break;
   case txtTbl: printTxtTbl(vars, varno); break;
+  case psTbl: printPSTbl(vars, varno); break;
  }
  putchar('\n');
  free(vars);
@@ -215,4 +231,86 @@ int printTxtExp(expr* ex) {
  }
  if (ex->paren) putchar(')');
  return len;
+}
+
+void printPSTbl(symbol** vars, int varno) {
+ puts("/tableTop currentpoint exch pop fontSize 1.2 mul sub def\n"
+  "72 tableTop fontSize 1.2 mul sub moveto newpath");
+ printf("/stmntWidths %d array def\n", stmntQty);
+ int i;
+ for (i=0; i<varno; i++) {
+  puts("barPad 0 rmoveto");
+  printf("(%c) dup stringwidth pop em exch sub 2 div dup 0 rmoveto exch show\n",
+   vars[i]->c);
+  puts("barPad add 0 rmoveto");
+ }
+ i=0;
+ for (expr* ex = statements; ex != NULL; ex = ex->next) {
+  puts("barPad 0 rmoveto /exprStart currentpoint pop def");
+  printPSExp(ex);
+  printf("stmntWidths %d currentpoint pop exprStart sub put\n", i++);
+  puts("barPad 0 rmoveto");
+ }
+ puts("0 barPad neg rmoveto 72 currentpoint exch pop lineto");
+ puts("0 barPad fontSize 1.2 mul add neg rmoveto");
+ do {
+  for (i=0; i<varno; i++) {
+   char truth = vars[i]->truth ? 'T' : 'F';
+   printf("%cPad barPad add dup 0 rmoveto (%c) show 0 rmoveto\n", truth, truth);
+  }
+  i=0;
+  for (expr* ex = statements; ex != NULL; ex = ex->next) {
+   puts("barPad 0 rmoveto");
+   char truth = evalExpr(ex) ? 'T' : 'F';
+   printf("stmntWidths %d get (%c) stringwidth pop sub 2 div dup 0 rmoveto (%c) show barPad add 0 rmoveto\n", i++, truth, truth);
+  }
+  puts("72 currentpoint exch pop fontSize 1.2 mul sub moveto");
+  for (i=varno-1; i>=0; i--) if (!(vars[i]->truth = !(vars[i]->truth))) break;
+ } while (i >= 0);
+ puts("/tableBottom currentpoint exch pop def");
+ printf("1 1 %d {\n"
+  " em barPad 2 mul add mul 72 add dup tableBottom moveto tableTop lineto\n"
+  "} for\n", varno);
+ printf("0 1 %d 1 sub {\n"
+  " stmntWidths exch get 0 rmoveto 0 tableBottom tableTop sub rlineto\n"
+  " 0 tableTop tableBottom sub rmoveto\n"
+  "} for\n", stmntQty);
+ puts("stroke\n");
+}
+
+void printPSExp(expr* ex) {
+ if (!ex) return; /* Do something else? */
+ if (ex->paren) puts("(\\() show");
+ char* binOp = NULL;
+ switch (ex->oper) {
+  case 0: printf("(%c) show\n", ex->sym->c); break;
+  case NOT:
+   puts("symFont setfont <D8> show varFont setfont");
+   printPSExp(ex->args[0]);
+   break;
+  case AND: binOp = "<D9>"; break;
+  case OR: binOp = "<DA>"; break;
+  case XOR:
+   printPSExp(ex->args[0]);
+   puts("symFont setfont <DA> dup show stringwidth pop neg 0 rmoveto"
+    " <D7> show varFont setfont");
+   printPSExp(ex->args[1]);
+   /* Alternative (the "(+)" symbol):
+    binOp = "<C5>";
+   */
+   break;
+  case THEN: binOp = "<AE>"; break;
+  case EQ: binOp = "<AB>"; break;
+  case ':':
+   printf("(%c : ) show\n", ex->sym->c);
+   printPSExp(ex->args[0]);
+   break;
+  default: return; /* And/or do something else? */
+ }
+ if (binOp != NULL) {
+  printPSExp(ex->args[0]);
+  printf("symFont setfont %s show varFont setfont\n", binOp);
+  printPSExp(ex->args[1]);
+ }
+ if (ex->paren) puts("(\\)) show");
 }
