@@ -28,11 +28,6 @@
 void yyerror(char*, ...);
 int yylex(void);
 extern FILE* yyin;
-
-struct {
- enum {txtTbl=0, latexTbl, texTbl, psTbl} tblType;
- _Bool eval : 1, standalone : 1;
-} flags = {0};
 %}
 
 %locations
@@ -90,6 +85,7 @@ void yyerror(char* s, ...) {
  va_end(arg);
  fputc('\n', stderr);
  if (flags.standalone) printDocEnd();
+  /* This feature shall remain UNDOCUMENTED!!! */
  exit(3);
 }
 
@@ -112,17 +108,14 @@ int main(int argc, char** argv) {
     if (!flags.eval) {
      flags.eval = 1;
      yyin = tmpfile();
-     if (!yyin) {
-      fprintf(stderr, "verity: error creating temp file: "); perror(NULL);
-      return 4;
-     }
+     if (!yyin) {perror("verity: error creating temp file"); return 4; }
     }
     fputs(optarg, yyin);
     fputc('\n', yyin);
     break;
    case 's': flags.standalone = 1; break;
    case 'V':
-    printf("Verity, a truth table generator, v.1.2.1\n"
+    printf("Verity, a truth table generator, v.1.3\n"
      "Written by John T. Wodder II (jwodder@sdf.lonestar.org)\n"
      "Compiled %s, %s\n"
      "Verity is distributed under the GNU General Public License v.3\n"
@@ -137,7 +130,7 @@ int main(int argc, char** argv) {
      "  -h  Print this summary of command-line options and exit\n"
      "  -l  Output a LaTeX tabular\n"
      "  -o  Write output to `outfile'\n"
-     "  -P  Output PostScript\n"
+     "  -P  Output a PostScript document\n"
      "  -p  Output plain text\n"
      "  -s  Output a complete Tex/LaTeX document\n"
      "  -t  Output a TeX table\n"
@@ -158,6 +151,7 @@ int main(int argc, char** argv) {
    return 5;
   }
  }
+ if (flags.tblType == psTbl) flags.standalone = 1;
  if (flags.standalone) printDocTop();
  return yyparse();
 }

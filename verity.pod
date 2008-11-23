@@ -6,18 +6,18 @@ B<verity> - generates truth tables of logical statements
 
 =head1 SYNOPSIS
 
-B<verity> [B<-p> | B<-t> | B<-l>] [B<-s>] [B<-o> I<outfile>] [B<-e> I<statements> | I<infile>]
+B<verity> [B<-P> | B<-p> | B<-t> | B<-l>] [B<-s>] [B<-o> I<outfile>] [B<-e> I<statements> | I<infile>]
 
 B<verity> [B<-h> | B<-V>]
 
 =head1 DESCRIPTION
 
 B<Verity> is a utility for generating truth tables for sets of logical
-statements.  Output can be as plain text, a TeX table, or a LaTeX I<tabular>
-environment.  The statements can be read from the standard input or an
-I<infile> or simply passed to B<Verity> on the command line as the argument to
-an B<-e> flag.  The syntax for the statements is descriped below under
-L</"STATEMENT SYNTAX">.
+statements.  Output can be as plain text, a TeX table, a LaTeX I<tabular>
+environment, or a PostScript document.  The statements can be read from the
+standard input or an I<infile> or simply passed to B<Verity> on the command
+line as the argument to an B<-e> flag.  The syntax for the statements is
+descriped below under L</"STATEMENT SYNTAX">.
 
 =head1 OPTIONS
 
@@ -36,28 +36,29 @@ Display a summary of the command-line options and exit.
 =item B<-l>
 
 Output is in the form of LaTeX C<tabular> environments.  If the B<-s> option is
-also specified, the tabulars are centered.  The B<-l> option overrides any
-previous B<-p> or B<-t> options.
+also specified, the tabulars are centered.
 
 =item B<-o> I<outfile>
 
 Output is written to file I<outfile>.
 
+=item B<-P>
+
+Output the table(s) as a PostScript document.
+
 =item B<-p>
 
-Output the table(s) as plain text.  This is the default.  The B<-p> option
-overrides any previous B<-t> or B<-l> options.
+Output the table(s) as plain text.  This is the default.
 
 =item B<-s>
 
 (La)TeX output is ``standalone,'' i.e., a complete document rather than a
 fragment suitable for importing into another document.  This option has no
-effect on plain text tables.
+effect on plain text tables or PostScript documents.
 
 =item B<-t>
 
-Output is in the form of centered TeX tables.  The B<-t> option overrides any
-previous B<-l> or B<-p> options.
+Output is in the form of centered TeX tables.
 
 =item B<-V>
 
@@ -75,11 +76,11 @@ named C<x>, C<X>, or C<v>, the letter must be preceded by a backslash.)
 Statements may be grouped within parentheses and negated with C<->, C<!>, or
 C<~>.  They may also be combined with C<< -> >>, which results in a statement
 which is false if & only if the left statement is true & the right statement
-false, and C<< <-> >>, which creates a statement which is true if & only if
-both the left & right statements have the same boolean value.  Parentheses and
-the negation operator have the highest & second highest precedence,
-respectively, followed by the AND, OR, and XOR operators, then C<< -> >>, and
-finally C<< <-> >>.  All binary operators are left-associative.
+false, and C<< <-> >> (or C<=> or C<==>), which creates a statement which is
+true if & only if both the left & right statements have the same boolean value.
+Parentheses and the negation operator have the highest & second highest
+precedence, respectively, followed by the AND, OR, and XOR operators, then C<<
+-> >>, and finally C<< <-> >>.  All binary operators are left-associative.
 
 Statements are delimited by semicolons or newlines (though a backslash at the
 end of a line causes the newline to be ignored, thus letting a single statement
@@ -136,6 +137,9 @@ When input to B<Verity>, the above statements yield the truth table:
     F|F|T| T  |   T    |  F   |      T
     F|F|F| T  |   T    |  F   |      T
 
+Note that the operator symbols are all reset to ones that resemble the standard
+mathematical notation.
+
 =head1 RESTRICTIONS
 
 Assignment of statements to variables with the colon operator should be done
@@ -143,11 +147,15 @@ before the variable is used in any other statements.  Otherwise, the behavior
 is undefined.  Similarly, assigning more than one statement to the same
 variable also leads to undefined behavior.
 
+Currently, the PostScript output takes no special steps to deal with tables
+going off the edge of the page; if one table reaches the bottom, any tables
+after it won't show up.
+
 =head1 NOTES
 
-The symbol used for XOR in (La)TeX output -- that of OR with a dot drawn above
-it -- is not the most common symbol for the operation, and I am considering
-changing it to something more well-known.
+The symbol used for XOR in (La)TeX and PostScript output -- that of OR with a
+dot drawn above it -- is not the most common symbol for the operation, and I am
+considering changing it to something more well-known.
 
 =head1 AUTHOR
 

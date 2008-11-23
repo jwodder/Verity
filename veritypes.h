@@ -33,6 +33,11 @@ typedef struct expr {
  struct expr* args[];
 } expr;
 
+struct {
+ enum {txtTbl=0, latexTbl, texTbl, psTbl} tblType;
+ _Bool eval : 1, standalone : 1;
+} flags;
+
 extern symbol* symTbl;
 extern expr* statements;
 extern int symQty, stmntQty;

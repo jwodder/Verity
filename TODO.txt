@@ -1,18 +1,40 @@
 VERITY TO-DO
-Features:
- - Add an option to output UTF-8 operator symbols in plain text mode?
- - Implement (Embedded?) PostScript output
- - Make commas valid statement delimiters?
+
+Things that need to be done or should be done:
+ - Consider changing the non-plain text XOR symbol to "(+)" (and accept '+' as
+   XOR for input?)
+ - Improve the quality of the PostScript output:
+  - Make the dot in the XOR symbol actually be centered
+  - Lower the tops of the vertical bars & lower their bottoms
+  - Lower the horizontal bars a bit?
+  - Center the tables?
+ - Handle PostScript tables that approach the bottom of the page (and ones that
+   are too wide?)
  - Implement error recovery up to the next EOL (though symbols that are only
    referenced in erroneous rules will need to be dealt with...)
+
+Ideas for possible new features:
+ - Add an option to output UTF-8 operator symbols in plain text mode
+ - Make commas valid statement delimiters
  - Allow multi-block files to alternate between braces-enclosed statements and
    unenclosed statements (maybe)
- - Add a "<-" operator?
-
-Documentation:
- - Note in the README that Bison is required for compiling
+ - Add a "<-" operator
+ - Implement a way for users to define their own boolean functions/operators to
+   use
+  - All function names are single letters (or possibly one of a small set of
+    punctuation marks), and if a binary function is used between two variables
+    without parentheses around any arguments, it is interpreted as a binary
+    operator (and this use should be honored in the output notation).
+  - Possible example syntax: ``S(p, q) := p ^ -q''; ":=" and ':' should
+    probably become alternate forms of each other.
+  - It should be possible to define functions outside of statement blocks,
+    thereby making them available for all subsequent blocks.
+ - Implement non-standalone PostScript output
+ - Implement embedded PostScript output
+ - Implement *roff/tbl(1) output
+ - Support variable names of arbitrary length
+ - Sort variables in the tables in alphabetical order
 
 Other:
  - When this is all done, update the version number to 1.3 & release it
   - Make sure that the date for v.1.3 in the README's history is accurate
- - Sort variables in the tables in alphabetical order?

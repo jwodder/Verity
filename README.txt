@@ -12,8 +12,8 @@
 
 Verity is a small utility for generating truth tables of logical statements of
 the sort that you would be assigned in a logic course.  Currently, it can
-output tables as plain ASCII text, TeX markup, or LaTeX markup.  See the
-manpage for more information.
+output tables as plain ASCII text, TeX or LaTeX markup, and PostScript.  See
+the manpage for more information.
 
 Verity was written by John T. Wodder II <jwodder@sdf.lonestar.org> and is
 licensed under the GNU GPL, v.3 or later.  There's no official project site,
@@ -49,6 +49,8 @@ veritypes.h - the header file for veritypes.c
  - Location tracking implemented for error messages; Bison (not Yacc) now
    required for compiling
  - Syntax error messages made more descriptive; Bison now required even more
+ - Added PostScript output
+ - '=' and "==" now accepted as alternatives for "<->"
 
 
 $Id$

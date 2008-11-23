@@ -78,6 +78,11 @@ int yylex(void) {
      yyerror("unexpected end of file while reading token");
      exit(3);
     } else {yyerror("malformed symbol \"<%c\"", ch); exit(3); }
+   case '=':
+    ch = fgetc(yyin);
+    if (ch != '=') ungetc(ch, yyin);
+    else yylloc.first_column++;
+    return EQ;
    case ':': case '(': case ')': case '{': case '}': return ch;
    case '\n':
     yylloc.first_line++;
