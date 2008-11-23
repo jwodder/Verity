@@ -1,5 +1,5 @@
 /* Verity - generates truth tables of logical statements
-   Copyright (C) 2007 John T. Wodder II
+   Copyright (C) 2007, 2008 John T. Wodder II
 
    This file is part of Verity.
 
@@ -16,27 +16,34 @@
    You should have received a copy of the GNU General Public License
    along with Verity.  If not, see <http://www.gnu.org/licenses/>. */
 
+/* $Id$ */
+
 #ifndef VERITYPES_H
 #define VERITYPES_H
 #include <stdio.h>
+#include <stdlib.h>
 
-#ifndef checkMem
-#define checkMem(p)  if (!p) {fprintf(stderr, "verity: %s: l.%d: failure to allocate memory: ", __FILE__, __LINE__); perror(NULL); exit(1); }
-#endif
+#define checkMem(p)  if (!(p)) {perror("verity"); exit(1); }
 
-typedef struct {char c; _Bool truth; } symbol;
-typedef struct expr {int oper, paren; symbol* sym; struct expr* args[]; } expr;
-typedef struct linkedItem {void* val; struct linkedItem* next; } linkedItem;
-typedef struct {int qty; linkedItem *first, *last; } linkedList;
-#define foreach(ll, it) for (linkedItem* it = ll ? ll->first : NULL; it != \
- NULL; it = it->next)
+typedef struct symbol {char c; _Bool truth; struct symbol* next; } symbol;
+typedef struct expr {
+ int oper, paren;
+ struct expr* next;
+ symbol* sym;
+ struct expr* args[];
+} expr;
 
-extern linkedList *symTbl, *statements;
+struct {
+ enum {txtTbl=0, latexTbl, texTbl, psTbl} tblType;
+ _Bool eval : 1, standalone : 1;
+} flags;
 
-void pushItem(linkedList* list, void* value);
-void initLists(void);
+extern symbol* symTbl;
+extern expr* statements;
+extern int symQty, stmntQty;
+
+void addStmnt(expr* ex);
 symbol* getSym(char c);
-symbol* newSym(char c);
 expr* symExpr(symbol* sym);
 expr* notExpr(expr* ex);
 expr* opExpr(int op, expr* left, expr* right);

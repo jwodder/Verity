@@ -1,5 +1,5 @@
 /* Verity - generates truth tables of logical statements
-   Copyright (C) 2007 John T. Wodder II
+   Copyright (C) 2007, 2008 John T. Wodder II
 
    This file is part of Verity.
 
@@ -16,57 +16,61 @@
    You should have received a copy of the GNU General Public License
    along with Verity.  If not, see <http://www.gnu.org/licenses/>. */
 
+/* $Id$ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "veritypes.h"
 #include "verity.tab.h"
 
-linkedList *symTbl, *statements;
+symbol* symTbl = NULL;
+expr* statements = NULL;
+int symQty = 0, stmntQty = 0;
 
-void pushItem(linkedList* list, void* value) {
- linkedItem* item = malloc(sizeof(linkedItem));
- checkMem(item);
- item->val = value;
- item->next = NULL;
- if (list->qty++) list->last = list->last->next = item;
- else list->first = list->last = item;
-}
-
-void initLists(void) {
- symTbl = malloc(sizeof(linkedList));
- checkMem(symTbl);
- symTbl->qty = 0;
- symTbl->first = symTbl->last = NULL;
- statements = malloc(sizeof(linkedList));
- checkMem(statements);
- statements->qty = 0;
- statements->first = statements->last = NULL;
+void addStmnt(expr* ex) {
+ if (statements == NULL) {
+  statements = ex;
+ } else {
+  expr* prev = statements;
+  while (prev->next != NULL) prev = prev->next;
+  prev->next = ex;
+ }
+ stmntQty++;
 }
 
 symbol* getSym(char c) {
- foreach(symTbl, s) if (((symbol*)s->val)->c == c) return s->val;
- symbol* sym = newSym(c);
- pushItem(symTbl, sym);
- return sym;
-}
-
-symbol* newSym(char c) {
+ symbol *s = symTbl, *prev = NULL;
+ for (; s != NULL; prev = s, s = s->next)
+  if (s->c == c) return s;
  symbol* sym = malloc(sizeof(symbol));
  checkMem(sym);
  sym->c = c;
- sym->truth = 1; /* Right? */
+ sym->truth = 1;
+ sym->next = NULL;
+ if (prev == NULL) symTbl = sym;
+ else prev->next = sym;
+ symQty++;
  return sym;
 }
 
 expr* symExpr(symbol* sym) {
- if (!sym) return NULL; expr* ex = malloc(sizeof(expr)); checkMem(ex);
- ex->oper = ex->paren = 0; ex->sym = sym; return ex;
+ if (!sym) return NULL;
+ expr* ex = malloc(sizeof(expr));
+ checkMem(ex);
+ ex->oper = ex->paren = 0;
+ ex->next = NULL;
+ ex->sym = sym;
+ return ex;
 }
 
 expr* notExpr(expr* ex) {
  if (!ex) return NULL;
- expr* negation = malloc(sizeof(expr) + sizeof(expr*)); checkMem(negation);
- negation->oper = NOT; negation->sym = NULL; negation->args[0] = ex;
+ expr* negation = malloc(sizeof(expr) + sizeof(expr*));
+ checkMem(negation);
+ negation->oper = NOT;
+ negation->next = NULL;
+ negation->sym = NULL;
+ negation->args[0] = ex;
  negation->paren = 0;
  return negation;
 }
@@ -74,8 +78,12 @@ expr* notExpr(expr* ex) {
 expr* opExpr(int op, expr* left, expr* right) {
  expr* operation = malloc(sizeof(expr) + 2 * sizeof(expr*));
  checkMem(operation);
- operation->oper = op; operation->sym = NULL; operation->paren = 0;
- operation->args[0] = left; operation->args[1] = right;
+ operation->oper = op;
+ operation->next = NULL;
+ operation->sym = NULL;
+ operation->paren = 0;
+ operation->args[0] = left;
+ operation->args[1] = right;
  return operation;
 }
 
@@ -103,6 +111,7 @@ expr* colonExpr(symbol* sym, expr* ex) {
  expr* assignment = malloc(sizeof(expr) + sizeof(expr*));
  checkMem(assignment);
  assignment->oper = ':';
+ assignment->next = NULL;
  assignment->sym = sym;
  assignment->paren = 0;
  sym->truth = 0;
@@ -111,16 +120,20 @@ expr* colonExpr(symbol* sym, expr* ex) {
 }
 
 void clearLists(void) {
- linkedItem* item = symTbl->first;
- symTbl->qty = 0; symTbl->first = symTbl->last = NULL;
- while (item) {
-  free(item->val); linkedItem* next = item->next; free(item); item = next;
+ for (symbol* s = symTbl; s != NULL; ) {
+  symbol* next = s->next;
+  free(s);
+  s = next;
  }
- item = statements->first;
- statements->qty = 0; statements->first = statements->last = NULL;
- while (item) {
-  freeExpr(item->val); linkedItem* next = item->next; free(item); item = next;
+ symTbl = NULL;
+ symQty = 0;
+ for (expr* ex = statements; ex != NULL; ) {
+  expr* next = ex->next;
+  freeExpr(ex);
+  ex = next;
  }
+ statements = NULL;
+ stmntQty = 0;
 }
 
 void freeExpr(expr* ex) {

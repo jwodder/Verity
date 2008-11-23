@@ -1,5 +1,5 @@
 /* Verity - generates truth tables of logical statements
-   Copyright (C) 2007 John T. Wodder II
+   Copyright (C) 2007, 2008 John T. Wodder II
 
    This file is part of Verity.
 
@@ -16,203 +16,301 @@
    You should have received a copy of the GNU General Public License
    along with Verity.  If not, see <http://www.gnu.org/licenses/>. */
 
+/* $Id$ */
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "veriprint.h"
 #include "veritypes.h"
 #include "verity.tab.h"
 
-extern struct {
- enum {txtTbl=0, latexTbl, texTbl} tblType;
- _Bool eval, standalone : 1;
-} flags;
+void printDocTop(void) {
+ if (flags.tblType == latexTbl)
+  puts("\\documentclass{article}\n\\begin{document}\n\\begin{center}");
+ else if (flags.tblType == psTbl) {
+  puts("%!PS-Adobe-3.0\n"
+   "/fontSize 12 def\n"
+   "/varFont /Times-Italic findfont fontSize scalefont def\n"
+   "/truthFont /Times-Roman findfont fontSize scalefont def\n"
+   "truthFont setfont /em (M) stringwidth pop def\n"
+   "/TPad em (T) stringwidth pop sub 2 div def\n"
+   "/FPad em (F) stringwidth pop sub 2 div def\n"
+   "/barPad em 4 div def\n"
+   /* barPad = padding on each side of table bars, including half the width of
+    * the bars */
+   "/symFont /Symbol findfont fontSize scalefont def\n"
+   "72 720 fontSize add moveto\n"
+  );
+ }
+}
 
-symbol** vars;
-int varno;
+void printDocEnd(void) {
+ if (flags.tblType == latexTbl) puts("\\end{center}\n\\end{document}");
+ else if (flags.tblType == texTbl) puts("\\bye");
+ else if (flags.tblType == psTbl) puts("stroke showpage");
+}
 
 void printTbl(void) {
- varno = 0;
- vars = calloc(symTbl->qty, sizeof(symbol*));
+ int varno = 0;
+ symbol** vars = calloc(symQty, sizeof(symbol*));
  checkMem(vars);
- foreach(symTbl, s) if (((symbol*)s->val)->truth) vars[varno++] = s->val;
- if (statements->qty)
-  switch (flags.tblType) {
-   case latexTbl: printLaTeXTbl(); break;
-   case texTbl: printTeXTbl(); break;
-   case txtTbl: printTxtTbl(); break;
-  }
+ for (symbol* s = symTbl; s != NULL; s = s->next)
+  if (s->truth) vars[varno++] = s;
+ switch (flags.tblType) {
+  case latexTbl: printLaTeXTbl(vars, varno); break;
+  case texTbl: printTeXTbl(vars, varno); break;
+  case txtTbl: printTxtTbl(vars, varno); break;
+  case psTbl: printPSTbl(vars, varno); break;
+ }
  putchar('\n');
  free(vars);
 }
 
-void printLaTeXTbl(void) {
+void printLaTeXTbl(symbol** vars, int varno) {
  int i;
  fputs("\\begin{tabular}{", stdout);
- for (i=0; i < varno + statements->qty; i++) {
-  if (i) putchar('|'); putchar('c');
+ for (i=0; i < varno + stmntQty; i++) {
+  if (i) putchar('|');
+  putchar('c');
  }
  fputs("}\n", stdout);
  for (i=0; i<varno; i++) {
   if (i) fputs(" & ", stdout);
   putchar('$'); putchar(vars[i]->c); putchar('$');
  }
- foreach(statements, ex) {
-  fputs(" & $", stdout); printTeXExp(ex->val); putchar('$');
+ for (expr* ex = statements; ex != NULL; ex = ex->next) {
+  fputs(" & $", stdout);
+  printTeXExp(ex);
+  putchar('$');
  }
  fputs(" \\\\ \\hline\n", stdout);
  do {
   for (i=0; i<varno; i++) {
-   if (i) fputs(" & ", stdout); putchar(vars[i]->truth ? 'T' : 'F');
+   if (i) fputs(" & ", stdout);
+   putchar(vars[i]->truth ? 'T' : 'F');
   }
-  foreach(statements, ex) {
-   fputs(" & ", stdout); putchar(evalExpr(ex->val) ? 'T' : 'F');
+  for (expr* ex = statements; ex != NULL; ex = ex->next) {
+   fputs(" & ", stdout);
+   putchar(evalExpr(ex) ? 'T' : 'F');
   }
   fputs(" \\\\\n", stdout);
-  for (i=varno-1; i>-1; i--) if (!(vars[i]->truth = !(vars[i]->truth))) break;
- } while (i > -1);
+  for (i=varno-1; i>=0; i--) if (!(vars[i]->truth = !(vars[i]->truth))) break;
+ } while (i >= 0);
  fputs("\\end{tabular}\n", stdout);
+}
+
+void printTeXTbl(symbol** vars, int varno) {
+ int i;
+ fputs("$$\\vbox{\\offinterlineskip\\halign{\n\\strut", stdout);
+ for (i=0; i < varno + stmntQty; i++) {
+  if (i) fputs(" & \\vrule", stdout);
+  fputs("\\hfil\\ #\\ \\hfil", stdout);
+ }
+ fputs("\\cr\n", stdout);
+ for (i=0; i<varno; i++) {
+  if (i) fputs(" & ", stdout);
+  putchar('$');
+  putchar(vars[i]->c);
+  putchar('$');
+ }
+ for (expr* ex = statements; ex != NULL; ex = ex->next) {
+  fputs(" & $", stdout);
+  printTeXExp(ex);
+  putchar('$');
+ }
+ fputs("\\cr\\noalign{\\hrule}\n", stdout);
+ do {
+  for (i=0; i<varno; i++) {
+   if (i) fputs(" & ", stdout);
+   putchar(vars[i]->truth ? 'T' : 'F');
+  }
+  for (expr* ex = statements; ex != NULL; ex = ex->next) {
+   fputs(" & ", stdout);
+   putchar(evalExpr(ex) ? 'T' : 'F');
+  }
+  fputs("\\cr\n", stdout);
+  for (i=varno-1; i>=0; i--) if (!(vars[i]->truth = !(vars[i]->truth))) break;
+ } while (i >= 0);
+ fputs("}}$$\n", stdout);
 }
 
 void printTeXExp(expr* ex) {
  if (!ex) return; /* Do something else? */
  if (ex->paren) putchar('(');
+ char* binOp = NULL;
  switch (ex->oper) {
   case 0: putchar(ex->sym->c); break;
   case NOT: fputs("\\neg ", stdout); printTeXExp(ex->args[0]); break;
-  case AND: 
-   printTeXExp(ex->args[0]); fputs(" \\wedge ", stdout);
-   printTeXExp(ex->args[1]); break;
-  case OR:
-   printTeXExp(ex->args[0]); fputs(" \\vee ", stdout);
-   printTeXExp(ex->args[1]); break;
-  case XOR:
-   printTeXExp(ex->args[0]); fputs(" \\dot{\\vee} ", stdout);
-   printTeXExp(ex->args[1]); break;
-  case THEN:
-   printTeXExp(ex->args[0]); fputs(" \\rightarrow ", stdout);
-   printTeXExp(ex->args[1]); break;
-  case EQ:
-   printTeXExp(ex->args[0]); fputs(" \\leftrightarrow ", stdout);
-   printTeXExp(ex->args[1]); break;
+  case AND: binOp = " \\wedge "; break;
+  case OR: binOp = " \\vee "; break;
+  case XOR: binOp = " \\dot{\\vee} "; break;
+  case THEN: binOp = " \\rightarrow "; break;
+  case EQ: binOp = " \\leftrightarrow "; break;
   case ':':
-   putchar(ex->sym->c); fputs("\\>:\\>", stdout);
-   printTeXExp(ex->args[0]); break;
+   putchar(ex->sym->c);
+   fputs("\\>:\\>", stdout);
+   printTeXExp(ex->args[0]);
+   break;
   default: return; /* And/or do something else? */
+ }
+ if (binOp != NULL) {
+  printTeXExp(ex->args[0]);
+  fputs(binOp, stdout);
+  printTeXExp(ex->args[1]);
  }
  if (ex->paren) putchar(')');
 }
 
-int exprLength(expr* ex) { /* Probably needs improvement */
- if (!ex) return 0;
- switch (ex->oper) {
-  case 0: return 1 + 2 * ex->paren;
-  case NOT: return 1 + exprLength(ex->args[0]) + 2 * ex->paren;
-  case AND: case OR: case XOR:
-   return 1 + exprLength(ex->args[0]) + exprLength(ex->args[1]) + 2 * ex->paren;
-  case THEN:
-   return 2 + exprLength(ex->args[0]) + exprLength(ex->args[1]) + 2 * ex->paren;
-  case EQ:
-   return 3 + exprLength(ex->args[0]) + exprLength(ex->args[1]) + 2 * ex->paren;
-  case ':': return 4 + exprLength(ex->args[0]);
-  default: return 0;
- }
-}
-
-void printTxtTbl(void) {
+void printTxtTbl(symbol** vars, int varno) {
  int i;
  for (i=0; i<varno; i++) {if (i) putchar('|'); putchar(vars[i]->c); }
- int* stmntLen = calloc(statements->qty, sizeof(int));
+ int* stmntLen = calloc(stmntQty, sizeof(int));
  checkMem(stmntLen);
  i=0;
- foreach(statements, ex) {
-  putchar('|'); printTxtExp(ex->val);
-  stmntLen[i++] = exprLength(ex->val);
-  /* Should printTxtExp() return the length instead? */
+ for (expr* ex = statements; ex != NULL; ex = ex->next) {
+  putchar('|');
+  stmntLen[i++] = printTxtExp(ex);
  }
  putchar('\n');
  for (i=0; i<varno; i++) {if (i) putchar('|'); putchar('-'); }
- for (i=0; i < statements->qty; i++) {
-  putchar('|'); for (int j=0; j<stmntLen[i]; j++) putchar('-');
+ for (i=0; i<stmntQty; i++) {
+  putchar('|');
+  for (int j=0; j<stmntLen[i]; j++) putchar('-');
  }
  putchar('\n');
  do {
   for (i=0; i<varno; i++) {
-   if (i) putchar('|'); putchar(vars[i]->truth ? 'T' : 'F');
+   if (i) putchar('|');
+   putchar(vars[i]->truth ? 'T' : 'F');
   }
   i=0;
-  foreach(statements, ex) {
+  for (expr* ex = statements; ex != NULL; ex = ex->next) {
    putchar('|');
    int j, len = stmntLen[i]/2 - !(stmntLen[i] % 2);
    for (j=0; j<len; j++) putchar(' ');
-   putchar(evalExpr(ex->val) ? 'T' : 'F');
+   putchar(evalExpr(ex) ? 'T' : 'F');
    len += !(stmntLen[i] % 2);
    if (ex->next) for (j=0; j<len; j++) putchar(' ');
    i++;
   }
   putchar('\n');
-  for (i=varno-1; i>-1; i--) if (!(vars[i]->truth = !(vars[i]->truth))) break;
- } while (i > -1);
+  for (i=varno-1; i>=0; i--) if (!(vars[i]->truth = !(vars[i]->truth))) break;
+ } while (i >= 0);
 }
 
-void printTxtExp(expr* ex) {
- if (!ex) return; /* Do something else? */
+int printTxtExp(expr* ex) {
+ if (!ex) return 0; /* Do something else? */
+ int len = ex->paren ? 2 : 0;
  if (ex->paren) putchar('(');
+ char* binOp = NULL;
  switch (ex->oper) {
-  case 0: putchar(ex->sym->c); break;
-  case NOT: putchar('-'); printTxtExp(ex->args[0]); break;
-  case AND:
-   printTxtExp(ex->args[0]); putchar('^'); printTxtExp(ex->args[1]); break;
-  case OR:
-   printTxtExp(ex->args[0]); putchar('v'); printTxtExp(ex->args[1]); break;
-  case XOR:
-   printTxtExp(ex->args[0]); putchar('x'); printTxtExp(ex->args[1]); break;
-  case THEN:
-   printTxtExp(ex->args[0]); fputs("->", stdout);
-   printTxtExp(ex->args[1]); break;
-  case EQ:
-   printTxtExp(ex->args[0]); fputs("<->", stdout);
-   printTxtExp(ex->args[1]); break;
+  case 0: putchar(ex->sym->c); len++; break;
+  case NOT: putchar('-'); len += 1 + printTxtExp(ex->args[0]); break;
+  case AND: binOp = "^"; break;
+  case OR: binOp = "v"; break;
+  case XOR: binOp = "x"; break;
+  case THEN: binOp = "->"; break;
+  case EQ: binOp = "<->"; break;
   case ':':
-   putchar(ex->sym->c); fputs(" : ", stdout); printTxtExp(ex->args[0]); break;
-  default: return; /* And/or do something else? */
+   putchar(ex->sym->c);
+   fputs(" : ", stdout);
+   len += 4 + printTxtExp(ex->args[0]);
+   break;
+  default: return len; /* And/or do something else? */
+ }
+ if (binOp != NULL) {
+  len += printTxtExp(ex->args[0]);
+  len += strlen(binOp);
+  fputs(binOp, stdout);
+  len += printTxtExp(ex->args[1]);
  }
  if (ex->paren) putchar(')');
+ return len;
 }
 
-void printDocTop(void) {
- if (flags.tblType == latexTbl)
-  puts("\\documentclass{article}\n\\begin{document}\n\\begin{center}");
-}
-
-void printDocEnd(void) {
- if (flags.tblType == latexTbl) puts("\\end{center}\n\\end{document}");
- else if (flags.tblType == texTbl) puts("\\bye");
-}
-
-void printTeXTbl(void) {
+void printPSTbl(symbol** vars, int varno) {
+ puts("/tableTop currentpoint exch pop fontSize sub def\n"
+  "72 tableTop fontSize sub moveto varFont setfont");
+ printf("/stmntWidths %d array def\n", stmntQty);
  int i;
- fputs("$$\\vbox{\\offinterlineskip\\halign{\n\\strut", stdout);
- for (i=0; i < varno + statements->qty; i++) {
-  if (i) fputs(" & \\vrule", stdout); fputs("\\hfil\\ #\\ \\hfil", stdout);
- }
- fputs("\\cr\n", stdout);
  for (i=0; i<varno; i++) {
-  if (i) fputs(" & ", stdout);
-  putchar('$'); putchar(vars[i]->c); putchar('$');
+  puts("barPad 0 rmoveto");
+  printf("(%c) dup stringwidth pop em exch sub 2 div dup 0 rmoveto exch show\n",
+   vars[i]->c);
+  puts("barPad add 0 rmoveto");
  }
- foreach(statements, ex) {
-  fputs(" & $", stdout); printTeXExp(ex->val); putchar('$');
+ i=0;
+ for (expr* ex = statements; ex != NULL; ex = ex->next) {
+  puts("barPad 0 rmoveto /exprStart currentpoint pop def");
+  printPSExp(ex);
+  printf("stmntWidths %d currentpoint pop exprStart sub put\n", i++);
+  puts("barPad 0 rmoveto");
  }
- fputs("\\cr\\noalign{\\hrule}\n", stdout);
+ puts("0 barPad neg rmoveto 72 currentpoint exch pop lineto\n"
+  "0 barPad neg rmoveto truthFont setfont");
  do {
+  puts("72 currentpoint exch pop fontSize sub moveto");
   for (i=0; i<varno; i++) {
-   if (i) fputs(" & ", stdout); putchar(vars[i]->truth ? 'T' : 'F');
+   char truth = vars[i]->truth ? 'T' : 'F';
+   printf("%cPad barPad add dup 0 rmoveto (%c) show 0 rmoveto\n", truth, truth);
   }
-  foreach(statements, ex) {
-   fputs(" & ", stdout); putchar(evalExpr(ex->val) ? 'T' : 'F');
+  i=0;
+  for (expr* ex = statements; ex != NULL; ex = ex->next) {
+   puts("barPad 0 rmoveto");
+   char truth = evalExpr(ex) ? 'T' : 'F';
+   printf("stmntWidths %d get (%c) stringwidth pop sub 2 div dup 0 rmoveto (%c) show barPad add 0 rmoveto\n", i++, truth, truth);
   }
-  fputs("\\cr\n", stdout);
-  for (i=varno-1; i>-1; i--) if (!(vars[i]->truth = !(vars[i]->truth))) break;
- } while (i > -1);
- fputs("}}$$\n", stdout);
+  for (i=varno-1; i>=0; i--) if (!(vars[i]->truth = !(vars[i]->truth))) break;
+ } while (i >= 0);
+ puts("/tableBottom currentpoint exch pop def");
+ printf("1 1 %d {\n"
+  " em barPad 2 mul add mul 72 add dup tableBottom moveto tableTop lineto\n"
+  "} for\n", varno);
+ printf("0 1 %d 2 sub {\n"
+  " stmntWidths exch get barPad 2 mul add 0 rmoveto\n"
+  " 0 tableBottom tableTop sub rlineto\n"
+  " 0 tableTop tableBottom sub rmoveto\n"
+  "} for\n", stmntQty);
+ puts("0 tableBottom tableTop sub rmoveto");
+}
+
+void printPSExp(expr* ex) {
+ if (!ex) return; /* Do something else? */
+ if (ex->paren) puts("truthFont setfont (\\() show varFont setfont");
+ char* binOp = NULL;
+ switch (ex->oper) {
+  case 0: printf("(%c) show\n", ex->sym->c); break;
+  case NOT:
+   puts("symFont setfont <D8> show varFont setfont");
+   printPSExp(ex->args[0]);
+   break;
+  case AND: binOp = "<D9>"; break;
+  case OR: binOp = "<DA>"; break;
+  case XOR:
+   printPSExp(ex->args[0]);
+   puts("symFont setfont\n"
+    "<DA> dup show stringwidth pop 2 div dup neg 0 rmoveto\n"
+    "truthFont setfont <C7> dup stringwidth pop -2 div dup 0 rmoveto\n"
+    "exch show add 0 rmoveto varFont setfont");
+   printPSExp(ex->args[1]);
+   /* Alternative (the "(+)" symbol):
+    binOp = "<C5>";
+   */
+   break;
+  case THEN: binOp = "<AE>"; break;
+  case EQ: binOp = "<AB>"; break;
+  case ':':
+   printf("(%c) show\n", ex->sym->c);
+   puts("truthFont setfont ( : ) show varFont setfont");
+   printPSExp(ex->args[0]);
+   break;
+  default: return; /* And/or do something else? */
+ }
+ if (binOp != NULL) {
+  printPSExp(ex->args[0]);
+  printf("symFont setfont %s show varFont setfont\n", binOp);
+  printPSExp(ex->args[1]);
+ }
+ if (ex->paren) puts("truthFont setfont (\\)) show varFont setfont");
 }

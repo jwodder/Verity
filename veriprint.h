@@ -1,5 +1,5 @@
 /* Verity - generates truth tables of logical statements
-   Copyright (C) 2007 John T. Wodder II
+   Copyright (C) 2007, 2008 John T. Wodder II
 
    This file is part of Verity.
 
@@ -16,17 +16,24 @@
    You should have received a copy of the GNU General Public License
    along with Verity.  If not, see <http://www.gnu.org/licenses/>. */
 
+/* $Id$ */
+
 #ifndef VERIPRINT_H
 #define VERIPRINT_H
 #include <stdio.h>
 #include "veritypes.h"
-void printTbl(void);
-void printLaTeXTbl(void);
-void printTeXExp(expr* ex);
-int exprLength(expr* ex);
-void printTxtTbl(void);
-void printTxtExp(expr* ex);
+
 void printDocTop(void);
 void printDocEnd(void);
-void printTeXTbl(void);
+void printTbl(void);
+
+void printLaTeXTbl(symbol** vars, int varno);
+void printTeXTbl(symbol** vars, int varno);
+void printTeXExp(expr* ex);
+
+void printTxtTbl(symbol** vars, int varno);
+int printTxtExp(expr* ex);
+
+void printPSTbl(symbol** vars, int varno);
+void printPSExp(expr* ex);
 #endif
