@@ -51,6 +51,13 @@ veritypes.h - the header file for veritypes.c
  - Syntax error messages made more descriptive; Bison now required even more
  - Added PostScript output
  - '=' and "==" now accepted as alternatives for "<->"
+??? - v.1.4:
+ - '+' now accepted as an alternative to 'x' and 'X'
+ - The symbol to use for XOR in output can now be set by #defining or not
+   #defining OLD_XOR_SYM in veriprint.c.  If it is #defined, the symbol will be
+   'x' in plain text output and 'v' with a dot over it in (La)TeX and
+   PostScript; if not #defined, it will be '+' in plain text and a circled '+'
+   in (La)TeX and PostScript.
 
 
 $Id$

@@ -54,7 +54,7 @@ int yylex(void) {
     if (ch != '|') ungetc(ch, yyin);
     else yylloc.first_column++;
     return OR;
-   case 'x': case 'X': return XOR;
+   case 'x': case 'X': case '+': return XOR;
    case '-': 
     ch = fgetc(yyin);
     if (ch == '>') {yylloc.first_column++; return THEN; }

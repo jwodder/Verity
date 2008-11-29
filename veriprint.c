@@ -25,6 +25,8 @@
 #include "veritypes.h"
 #include "verity.tab.h"
 
+/* #define OLD_XOR_SYM */
+
 void printDocTop(void) {
  if (flags.tblType == latexTbl)
   puts("\\documentclass{article}\n\\begin{document}\n\\begin{center}");
@@ -144,7 +146,11 @@ void printTeXExp(expr* ex) {
   case NOT: fputs("\\neg ", stdout); printTeXExp(ex->args[0]); break;
   case AND: binOp = " \\wedge "; break;
   case OR: binOp = " \\vee "; break;
+#ifdef OLD_XOR_SYM
   case XOR: binOp = " \\dot{\\vee} "; break;
+#else
+  case XOR: binOp = " \\oplus "; break;
+#endif
   case THEN: binOp = " \\rightarrow "; break;
   case EQ: binOp = " \\leftrightarrow "; break;
   case ':':
@@ -209,7 +215,11 @@ int printTxtExp(expr* ex) {
   case NOT: putchar('-'); len += 1 + printTxtExp(ex->args[0]); break;
   case AND: binOp = "^"; break;
   case OR: binOp = "v"; break;
+#ifdef OLD_XOR_SYM
   case XOR: binOp = "x"; break;
+#else
+  case XOR: binOp = "+"; break;  /* Consider this */
+#endif
   case THEN: binOp = "->"; break;
   case EQ: binOp = "<->"; break;
   case ':':
@@ -288,15 +298,16 @@ void printPSExp(expr* ex) {
   case AND: binOp = "<D9>"; break;
   case OR: binOp = "<DA>"; break;
   case XOR:
+#ifdef OLD_XOR_SYM
    printPSExp(ex->args[0]);
    puts("symFont setfont\n"
     "<DA> dup show stringwidth pop 2 div dup neg 0 rmoveto\n"
     "truthFont setfont <C7> dup stringwidth pop -2 div dup 0 rmoveto\n"
     "exch show add 0 rmoveto varFont setfont");
    printPSExp(ex->args[1]);
-   /* Alternative (the "(+)" symbol):
-    binOp = "<C5>";
-   */
+#else
+   binOp = "<C5>";
+#endif
    break;
   case THEN: binOp = "<AE>"; break;
   case EQ: binOp = "<AB>"; break;
