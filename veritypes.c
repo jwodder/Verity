@@ -28,6 +28,7 @@ expr* statements = NULL;
 int symQty = 0, stmntQty = 0;
 
 void addStmnt(expr* ex) {
+ if (ex == NULL) return;  /* Don't store error statements */
  if (statements == NULL) {
   statements = ex;
  } else {
@@ -41,11 +42,12 @@ void addStmnt(expr* ex) {
 symbol* getSym(char c) {
  symbol *s = symTbl, *prev = NULL;
  for (; s != NULL; prev = s, s = s->next)
-  if (s->c == c) return s;
+  if (s->c == c) {s->refQty++; return s; }
  symbol* sym = malloc(sizeof(symbol));
  checkMem(sym);
  sym->c = c;
  sym->truth = 1;
+ sym->refQty = 1;
  sym->next = NULL;
  if (prev == NULL) symTbl = sym;
  else prev->next = sym;
@@ -140,8 +142,8 @@ void freeExpr(expr* ex) {
  if (!ex) return;
  int arity = 2;
  switch (ex->oper) {
-  case 0: /*free(ex->sym);*/ break;
-  case ':': /*free(ex->sym);*/
+  case 0: ex->sym->refQty--; break;
+  case ':': ex->sym->refQty--;
   case NOT: arity = 1;
   default: for (int i=0; i<arity; i++) freeExpr(ex->args[i]);
  }

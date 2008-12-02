@@ -30,9 +30,6 @@ int yylex(void);
 extern FILE* yyin;
 %}
 
-%locations
-%error-verbose
-
 %union {symbol* sym; expr* stmnt; }
 %token <sym> SYM
 %type <stmnt> expr statement
@@ -43,6 +40,11 @@ extern FILE* yyin;
 %left AND OR XOR
 %nonassoc NOT
 %nonassoc '(' ')'
+
+%locations
+%error-verbose
+%destructor {freeExpr($$); } expr statement
+%destructor {$$->refQty--; } SYM
 
 %%
 
@@ -56,12 +58,15 @@ blocks: blocks gap '{' exprSet gap '}'  {printTbl(); clearLists(); }
 
 exprSet: exprSet gap EOL statement  {addStmnt($4); }
 	| gap statement  {addStmnt($2); }
+	| gap error EOL  {yyerrok; }
+	| exprSet gap EOL error EOL  {yyerrok; }
 	;
 
 gap: gap EOL  |  ;
 
 statement: SYM ':' expr  {$$ = colonExpr($1, $3); }
 	| expr  {$$ = $1; }
+	/* | error  {yyerrok; $$ = NULL; } // Terminated by the next EOL or EOF */
 	;
 
 expr: SYM  {$$ = symExpr($1); }

@@ -25,7 +25,13 @@
 
 #define checkMem(p)  if (!(p)) {perror("verity"); exit(1); }
 
-typedef struct symbol {char c; _Bool truth; struct symbol* next; } symbol;
+typedef struct symbol {
+ char c;
+ _Bool truth;
+ int refQty;
+ struct symbol* next;
+} symbol;
+
 typedef struct expr {
  int oper, paren;
  struct expr* next;

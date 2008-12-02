@@ -54,11 +54,12 @@ void printDocEnd(void) {
 }
 
 void printTbl(void) {
+ if (stmntQty == 0) return; /* in case an exprSet consists entirely of errors */
  int varno = 0;
  symbol** vars = calloc(symQty, sizeof(symbol*));
  checkMem(vars);
  for (symbol* s = symTbl; s != NULL; s = s->next)
-  if (s->truth) vars[varno++] = s;
+  if (s->truth && s->refQty > 0) vars[varno++] = s;
  switch (flags.tblType) {
   case latexTbl: printLaTeXTbl(vars, varno); break;
   case texTbl: printTeXTbl(vars, varno); break;
