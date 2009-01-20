@@ -1,0 +1,156 @@
+=pod
+
+=head1 NAME
+
+B<verity> - generates truth tables of logical statements
+
+=head1 SYNOPSIS
+
+B<verity> [B<-p> | B<-t> | B<-l>] [B<-s>] [B<-o> I<outfile>] [B<-e> I<statements> | I<infile>]
+
+B<verity> [B<-hV>]
+
+=head1 DESCRIPTION
+
+B<Verity> is a utility for generating the truth tables for sets of logical
+statements.  Output can be as plain text, a TeX table, or a LaTeX I<tabular>
+environment.  The statements can be read from the standard input or an
+I<infile> or simply passed to B<verity> on the command line as the argument to
+an B<-e> flag.  The syntax for the statements is descriped below under
+L</"STATEMENT SYNTAX">.
+
+=head1 OPTIONS
+
+=over
+
+=item B<-e> I<statements>
+
+B<Verity> treats I<statements>, along with the arguments of any following B<-e>
+switches, as newline-terminated input.  If an infile is specified on the
+command line, it is ignored.
+
+=item B<-h>
+
+Display a summary of command-line options and exit.
+
+=item B<-l>
+
+Output is in the form of LaTeX I<tabular> environments.  If the B<-s> option is
+also specified, the tabulars are centered.
+
+=item B<-o> I<outfile>
+
+Output is written to file I<outfile>.
+
+=item B<-p>
+
+Output the table(s) as plain text.  This is the default.  The B<-p> option
+overrides any previous B<-t> or B<-l> options.
+
+=item B<-s>
+
+(La)TeX output is ``standalone,'' i.e., a complete document rather than a
+fragment suitable for importing into another document.  This option has no
+effect on plain text tables.
+
+=item B<-t>
+
+Output is in the form of centered TeX tables.
+
+=item B<-V>
+
+Display version information & exit
+
+=back
+
+=head1 STATEMENT SYNTAX
+
+Statements consist of letters (other than C<v>, C<x>, and C<X>), representing
+boolean variables, combined with logical AND (C<^>, C<&>, or C<&&>), logical
+inclusive OR (C<v> or C<||>), and/or logical exclusive OR (C<x> or C<X>).
+Statements may be grouped within parentheses and negated with C<->, C<!>, or
+C<~>.  They may also be combined with C<< -> >>, which results in a statement
+which is false if & only if the left statement is true & the right statement
+false, and C<< <-> >>, which creates a statement which is true if and only if
+both the left & right statements have the same boolean value.  Parentheses and
+the negation operator have the highest & second highest precedence,
+respectively, followed by the AND, OR, and XOR operators, then C<< -> >>, and
+finally C<< <-> >>.  All binary operators are left-associative.
+
+Statements are separated by semicolons or newlines, and all statements listed
+in the input file are output in the resulting truth table.  There is no need to
+list the variables explicitly, as any variables used will be automatically
+placed at the left end of the table in the order in which they appear in the
+statements.  The truth value of a specific statement can be assigned to a
+variable by prefixing the statement with the variable, followed by a colon.
+
+Multiple tables can be output by grouping the statements for each table between
+braces.
+
+Comments can also be inserted into the input, beginning with a pound sign
+(C<#>) and continuing to the end of the line.
+
+=head1 EXAMPLES
+
+The following line causes B<verity> to output the combined truth table for the
+statements ``p AND q'' and ``p OR q'':
+
+    p ^ q; p v q
+
+As plain text, the output for the above is:
+
+    p|q|p^q|pvq
+    -|-|---|---
+    T|T| T | T
+    T|F| F | T
+    F|T| F | T
+    F|F| F | F
+
+For a somewhat more complex example, consider the following statements.  Note
+that the statement C<p v -q> is assigned to the variable C<S> for ease of
+reference in the following statement.
+
+    -p x q
+    S : p v -q
+    S -> q^r
+    pvr <-> -(-p^-r)
+
+When input to B<verity>, the above statements yield the truth table:
+
+    p|q|r|-pxq|S : pv-q|S->q^r|pvr<->-(-p^-r)
+    -|-|-|----|--------|------|--------------
+    T|T|T| T  |   T    |  T   |      T
+    T|T|F| T  |   T    |  F   |      T
+    T|F|T| F  |   T    |  F   |      T
+    T|F|F| F  |   T    |  F   |      T
+    F|T|T| F  |   F    |  T   |      T
+    F|T|F| F  |   F    |  T   |      T
+    F|F|T| T  |   T    |  F   |      T
+    F|F|F| T  |   T    |  F   |      T
+
+=head1 RESTRICTIONS
+
+Assignment of statements to variables with the colon operator should be done
+before the variable is used in any other statements.  Otherwise, the behavior
+is undefined.
+
+=head1 NOTES
+
+The symbol used for XOR in (La)TeX output -- that of OR with a dot drawn above
+it -- is not the most common symbol for the operation, and I am considering
+changing it to something more well-known.
+
+=head1 AUTHOR
+
+John T. Wodder II <minimiscience@users.sourceforge.net>
+
+=head1 COPYRIGHT
+
+Copyright 2007 by John T. Wodder II
+
+B<Verity> is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation; either version 3 of the License, or (at your option) any later
+version, etc., etc.  See the GNU GPL for more information.
+
+=cut
