@@ -122,13 +122,6 @@ expr* colonExpr(symbol* sym, expr* ex) {
 }
 
 void clearLists(void) {
- for (symbol* s = symTbl; s != NULL; ) {
-  symbol* next = s->next;
-  free(s);
-  s = next;
- }
- symTbl = NULL;
- symQty = 0;
  for (expr* ex = statements; ex != NULL; ) {
   expr* next = ex->next;
   freeExpr(ex);
@@ -136,6 +129,13 @@ void clearLists(void) {
  }
  statements = NULL;
  stmntQty = 0;
+ for (symbol* s = symTbl; s != NULL; ) {
+  symbol* next = s->next;
+  free(s);
+  s = next;
+ }
+ symTbl = NULL;
+ symQty = 0;
 }
 
 void freeExpr(expr* ex) {
