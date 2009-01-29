@@ -58,15 +58,19 @@ blocks: blocks gap '{' exprSet gap '}'  {printTbl(); clearLists(); }
 
 exprSet: exprSet gap EOL statement  {addStmnt($4); }
 	| gap statement  {addStmnt($2); }
-	| gap error EOL  {yyerrok; }
-	| exprSet gap EOL error EOL  {yyerrok; }
 	;
 
 gap: gap EOL  |  ;
 
 statement: SYM ':' expr  {$$ = colonExpr($1, $3); }
 	| expr  {$$ = $1; }
-	/* | error  {yyerrok; $$ = NULL; } // Terminated by the next EOL or EOF */
+	| blight {yyerrok; $$ = NULL; }
+	;
+
+blight: blight error
+	| blight expr  {freeExpr($2); }
+	| expr error  {freeExpr($1); }
+	| error
 	;
 
 expr: SYM  {$$ = symExpr($1); }
@@ -89,9 +93,9 @@ void yyerror(char* s, ...) {
  vfprintf(stderr, s, arg);
  va_end(arg);
  fputc('\n', stderr);
- if (flags.standalone) printDocEnd();
+ //if (flags.standalone) printDocEnd();
   /* This feature shall remain UNDOCUMENTED!!! */
- exit(3);
+ //exit(3);
 }
 
 int main(int argc, char** argv) {
