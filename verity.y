@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <locale.h>
 #include <unistd.h>
 #include "veritypes.h"
 #include "veriprint.h"
@@ -93,14 +94,12 @@ void yyerror(char* s, ...) {
  vfprintf(stderr, s, arg);
  va_end(arg);
  fputc('\n', stderr);
- //if (flags.standalone) printDocEnd();
-  /* This feature shall remain UNDOCUMENTED!!! */
- //exit(3);
 }
 
 int main(int argc, char** argv) {
+ if (setlocale(LC_ALL, "") == NULL) perror("verity: error setting locale");
  int opt;
- while ((opt = getopt(argc, argv, "o:plte:sVhP")) != -1) {
+ while ((opt = getopt(argc, argv, "o:plte:sVhPuU")) != -1) {
   switch (opt) {
    case 'o':
     if (freopen(optarg, "w", stdout) == NULL) {
@@ -110,6 +109,8 @@ int main(int argc, char** argv) {
     }
     break;
    case 'p': flags.tblType = txtTbl; break;
+   case 'u': flags.tblType = wideTbl; break;
+   case 'U': flags.tblType = utfTbl; break;
    case 'l': flags.tblType = latexTbl; break;
    case 't': flags.tblType = texTbl; break;
    case 'P': flags.tblType = psTbl; break;
@@ -124,7 +125,7 @@ int main(int argc, char** argv) {
     break;
    case 's': flags.standalone = 1; break;
    case 'V':
-    printf("Verity, a truth table generator, v.1.3\n"
+    printf("Verity, a truth table generator, v.1.4\n"
      "Written by John T. Wodder II (jwodder@sdf.lonestar.org)\n"
      "Compiled %s, %s\n"
      "Verity is distributed under the GNU General Public License v.3\n"
@@ -132,8 +133,8 @@ int main(int argc, char** argv) {
      __DATE__, __TIME__);
     return 0;
    case 'h':
-    printf("Usage: verity [-P | -p | -t | -l] [-s] [-o outfile] [-e statements"
-     " | infile]\n       verity [-h | -V]\n\n"
+    printf("Usage: verity [-P | -p | -t | -l | -u | -U] [-s] [-o outfile] [-e"
+     " statements | infile]\n       verity [-h | -V]\n\n"
      "Options:\n"
      "  -e statements - Treat `statements' as input\n"
      "  -h - Print this summary of command-line options and exit\n"
@@ -143,11 +144,13 @@ int main(int argc, char** argv) {
      "  -p - Output plain text\n"
      "  -s - Output a complete Tex/LaTeX document\n"
      "  -t - Output a TeX table\n"
+     "  -u - Output plain text with Unicode operators\n"
+     "  -U - Output a Unicode table\n"
      "  -V - Print version information and exit\n");
     return 0;
    default:
-    fprintf(stderr, "Usage: verity [-P | -p | -t | -l] [-s] [-o outfile] [-e"
-     " statements | infile]\n       verity [-h | -V]\n");
+    fprintf(stderr, "Usage: verity [-P | -p | -t | -l | -u | -U] [-s] [-o"
+     " outfile] [-e statements | infile]\n       verity [-h | -V]\n");
     return 2;
   }
  }

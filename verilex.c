@@ -70,9 +70,6 @@ int yylex(void) {
      else if (ch == EOF) {
       yyerror("unexpected end of file while reading token");
       exit(3);
-      /* Even though yyerror() calls exit() itself, exit() is explicitly called
-       * here & throughout the program just in case the call is later removed
-       * from yyerror() and I forget to amend all the invocations. */
      } else {yyerror("malformed symbol \"<-%c\"", ch); exit(3); }
     } else if (ch == EOF) {
      yyerror("unexpected end of file while reading token");

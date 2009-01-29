@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <wchar.h>
 #include "veriprint.h"
 #include "veritypes.h"
 #include "verity.tab.h"
@@ -63,7 +64,11 @@ void printTbl(void) {
  switch (flags.tblType) {
   case latexTbl: printLaTeXTbl(vars, varno); break;
   case texTbl: printTeXTbl(vars, varno); break;
-  case txtTbl: printTxtTbl(vars, varno); break;
+  case txtTbl:
+  case wideTbl:
+   printTxtTbl(vars, varno);
+   break;
+  case utfTbl: printUTFTbl(vars, varno); break;
   case psTbl: printPSTbl(vars, varno); break;
  }
  putchar('\n');
@@ -177,7 +182,11 @@ void printTxtTbl(symbol** vars, int varno) {
  i=0;
  for (expr* ex = statements; ex != NULL; ex = ex->next) {
   putchar('|');
-  stmntLen[i++] = printTxtExp(ex);
+  if (flags.tblType == wideTbl) {
+   fwide(stdout, 1);
+   stmntLen[i++] = printUTFExp(ex);
+   fwide(stdout, -1);
+  } else {stmntLen[i++] = printTxtExp(ex); }
  }
  putchar('\n');
  for (i=0; i<varno; i++) {if (i) putchar('|'); putchar('-'); }
@@ -219,7 +228,7 @@ int printTxtExp(expr* ex) {
 #ifdef OLD_XOR_SYM
   case XOR: binOp = "x"; break;
 #else
-  case XOR: binOp = "+"; break;  /* Consider this */
+  case XOR: binOp = "+"; break;  /* Reconsider this */
 #endif
   case THEN: binOp = "->"; break;
   case EQ: binOp = "<->"; break;
@@ -237,6 +246,83 @@ int printTxtExp(expr* ex) {
   len += printTxtExp(ex->args[1]);
  }
  if (ex->paren) putchar(')');
+ return len;
+}
+
+void printUTFTbl(symbol** vars, int varno) {
+ int i;
+ for (i=0; i<varno; i++) {
+  if (i) putwchar(L'\u2502');
+  putwchar(btowc(vars[i]->c));
+ }
+ int* stmntLen = calloc(stmntQty, sizeof(int));
+ checkMem(stmntLen);
+ i=0;
+ for (expr* ex = statements; ex != NULL; ex = ex->next) {
+  putwchar(L'\u2502');
+  stmntLen[i++] = printUTFExp(ex);
+ }
+ putwchar(L'\n');
+ for (i=0; i<varno; i++) {if (i) putwchar(L'\u2502'); putwchar(L'\u2500'); }
+ for (i=0; i<stmntQty; i++) {
+  putwchar(L'\u2502');
+  for (int j=0; j<stmntLen[i]; j++) putwchar(L'\u2500');
+ }
+ putwchar(L'\n');
+ do {
+  for (i=0; i<varno; i++) {
+   if (i) putwchar(L'\u2502');
+   putwchar(vars[i]->truth ? L'T' : L'F');
+  }
+  i=0;
+  for (expr* ex = statements; ex != NULL; ex = ex->next) {
+   putwchar(L'\u2502');
+   int j, len = stmntLen[i]/2 - !(stmntLen[i] % 2);
+   for (j=0; j<len; j++) putwchar(L' ');
+   putwchar(evalExpr(ex) ? L'T' : L'F');
+   len += !(stmntLen[i] % 2);
+   if (ex->next) for (j=0; j<len; j++) putwchar(L' ');
+   i++;
+  }
+  putwchar(L'\n');
+  for (i=varno-1; i>=0; i--) if (!(vars[i]->truth = !(vars[i]->truth))) break;
+ } while (i >= 0);
+}
+
+int printUTFExp(expr* ex) {
+ if (!ex) return 0; /* Do something else? */
+ int len = ex->paren ? 2 : 0;
+ if (ex->paren) putwchar(L'(');
+ wchar_t binOp = 0;
+ switch (ex->oper) {
+  case 0: putwchar(btowc(ex->sym->c)); len++; break;
+  case NOT: 
+   putwchar(L'\u00AC');
+   len += wcwidth(L'\u00AC') + printUTFExp(ex->args[0]);
+   break;
+  case AND: binOp = L'\u22C0'; break;
+  case OR: binOp = L'\u22C1'; break;
+#ifdef OLD_XOR_SYM
+  case XOR: binOp = L'\u2A52'; break;
+#else
+  case XOR: binOp = L'\u2A01'; break;
+#endif
+  case THEN: binOp = L'\u2192'; break;
+  case EQ: binOp = L'\u2194'; break;
+  case ':':
+   putwchar(btowc(ex->sym->c));
+   fputws(L" : ", stdout);
+   len += 4 + printUTFExp(ex->args[0]);
+   break;
+  default: return len; /* And/or do something else? */
+ }
+ if (binOp != 0) {
+  len += printUTFExp(ex->args[0]);
+  len += wcwidth(binOp);
+  putwchar(binOp);
+  len += printUTFExp(ex->args[1]);
+ }
+ if (ex->paren) putwchar(L')');
  return len;
 }
 

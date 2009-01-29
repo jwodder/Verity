@@ -34,6 +34,9 @@ void printTeXExp(expr* ex);
 void printTxtTbl(symbol** vars, int varno);
 int printTxtExp(expr* ex);
 
+void printUTFTbl(symbol** vars, int varno);
+int printUTFExp(expr* ex);
+
 void printPSTbl(symbol** vars, int varno);
 void printPSExp(expr* ex);
 #endif

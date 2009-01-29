@@ -40,7 +40,7 @@ typedef struct expr {
 } expr;
 
 struct {
- enum {txtTbl=0, latexTbl, texTbl, psTbl} tblType;
+ enum {txtTbl=0, wideTbl, utfTbl, latexTbl, texTbl, psTbl} tblType;
  _Bool eval : 1, standalone : 1;
 } flags;
 

@@ -58,7 +58,9 @@ veritypes.h - the header file for veritypes.c
    'x' in plain text output and 'v' with a dot over it in (La)TeX and
    PostScript; if not #defined, it will be '+' in plain text and a circled '+'
    in (La)TeX and PostScript.
- - Implemented error recovery up to the next newline or semicolon
+ - Implemented error recovery for invalid statements up to the next newline or
+   semicolon
+ - Added the -u and -U switches for producing Unicode output
 
 
 $Id$

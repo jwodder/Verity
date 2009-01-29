@@ -8,7 +8,7 @@ CFLAGS = -O2
 all : verity verity.1
 
 verity : $(OBJS)
-	c99 -o verity $(OBJS)
+	$(CC) -o verity $(OBJS)
 verity.tab.o verilex.o veritypes.o veriprint.o : veritypes.h
 verilex.o veritypes.o veriprint.o : verity.tab.h
 verity.tab.o veriprint.o : veriprint.h
