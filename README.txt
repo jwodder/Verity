@@ -63,4 +63,6 @@ veritypes.h - the header file for veritypes.c
  - Added the -u and -U switches for producing Unicode output
 
 
-$Id$
+$Commit: $Format:%H$ $
+$Date: $Format:%ai$ $
+$Author: $Format:%an$ $

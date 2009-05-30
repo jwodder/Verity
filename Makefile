@@ -1,4 +1,6 @@
-# $Id$
+# $Commit: $Format:%H$ $
+# $Date: $Format:%ai$ $
+# $Author: $Format:%an$ $
 
 OBJS = verity.tab.o verilex.o veritypes.o veriprint.o
 CC = c99

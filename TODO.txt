@@ -28,21 +28,28 @@ Ideas for possible new features:
    unenclosed statements (maybe)
  - Add a "<-" operator
  - Implement a way for users to define their own boolean functions/operators
-  - All function names are single letters (or possibly one of a small set of
-    punctuation marks), and if a binary function is used between two variables
-    without parentheses around any arguments, it is interpreted as a binary
-    operator (and this use should be honored in the output notation).
+  - If a binary function is used between two variables without parentheses
+    around any arguments, it is interpreted as a binary operator with left
+    associativity (and this use should be honored in the output notation).
   - Possible example syntax: ``S(p, q) := p ^ -q''; ":=" and ':' should
     probably become alternate forms of each other (and be given the token name
     ``ASSIGN'' for error message purposes).
   - It should be possible to define functions outside of statement blocks,
-    thereby making them available for all subsequent blocks.
+    thereby making them available for all subsequent blocks.  (So functions
+    inside blocks are scoped to the block?)
+  - After implementing this, consider implementing "include" statements for
+    including files containing predefined user functions.
+  - Variables that are not parameters may be used inside function definitions,
+    in which case they refer to variables with those names declared for the
+    block (so be careful to avoid implementing dynamic scoping).
  - Implement non-standalone PostScript output
  - Implement embedded PostScript output
  - Implement *roff/tbl(1) output
- - Support variable names of arbitrary length
  - Sort variables in the tables in alphabetical order
- - Allow wide (alphabetic) characters as variables?
- - Allow wide-character operators in input?
+ - Allow identifier names to be arbitrarily long strings of non-whitespace,
+   non-parenthesis characters (including wide characters)
+ - Support wide-character versions of the built-in operators
 
-$Id$
+$Commit: $Format:%H$ $
+$Date: $Format:%ai$ $
+$Author: $Format:%an$ $
