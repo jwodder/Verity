@@ -16,9 +16,9 @@
    You should have received a copy of the GNU General Public License
    along with Verity.  If not, see <http://www.gnu.org/licenses/>. */
 
-/* $Commit: $Format:%H$ $
- * $Date: $Format:%ai$ $
- * $Author: $Format:%an$ $
+/* $Commit: $Format:%H$$
+ * $Date: $Format:%ai$$
+ * $Author: $Format:%an$$
  */
 
 #include <stdio.h>
@@ -266,9 +266,9 @@ void printUTFTbl(symbol** vars, int varno) {
   stmntLen[i++] = printUTFExp(ex);
  }
  putwchar(L'\n');
- for (i=0; i<varno; i++) {if (i) putwchar(L'\u2502'); putwchar(L'\u2500'); }
+ for (i=0; i<varno; i++) {if (i) putwchar(L'\u253C'); putwchar(L'\u2500'); }
  for (i=0; i<stmntQty; i++) {
-  putwchar(L'\u2502');
+  putwchar(L'\u253C');
   for (int j=0; j<stmntLen[i]; j++) putwchar(L'\u2500');
  }
  putwchar(L'\n');

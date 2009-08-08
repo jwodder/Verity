@@ -16,9 +16,9 @@
    You should have received a copy of the GNU General Public License
    along with Verity.  If not, see <http://www.gnu.org/licenses/>. */
 
-/* $Commit: $Format:%H$ $
- * $Date: $Format:%ai$ $
- * $Author: $Format:%an$ $
+/* $Commit: $Format:%H$$
+ * $Date: $Format:%ai$$
+ * $Author: $Format:%an$$
  */
 
 %{
@@ -64,7 +64,7 @@ exprSet: exprSet gap EOL statement  {addStmnt($4); }
 	| gap statement  {addStmnt($2); }
 	;
 
-gap: gap EOL  |  ;
+gap: gap EOL | ;
 
 statement: SYM ':' expr  {$$ = colonExpr($1, $3); }
 	| expr  {$$ = $1; }
