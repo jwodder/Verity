@@ -61,8 +61,3 @@ veritypes.h - the header file for veritypes.c
  - Implemented error recovery for invalid statements up to the next newline or
    semicolon
  - Added the -u and -U switches for producing Unicode output
-
-
-$Commit: $Format:%H$ $
-$Date: $Format:%ai$ $
-$Author: $Format:%an$ $

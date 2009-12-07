@@ -51,7 +51,4 @@ Ideas for possible new features:
  - Add a switch for disabling recognition of 'v' and 'x' as operators (or,
    alternatively, rewrite the grammar so that it transparently allows 'x's and
    'v's as either operators or variables)
-
-$Commit: $Format:%H$$
-$Date: $Format:%ai$$
-$Author: $Format:%an$$
+ - Add a ternary/conditional operator
