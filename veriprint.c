@@ -303,7 +303,7 @@ int printUTFExp(expr* ex) {
 #ifdef OLD_XOR_SYM
   case XOR: binOp = L'\u2A52'; break;
 #else
-  case XOR: binOp = L'\u2A01'; break;
+  case XOR: binOp = L'\u2295'; break;
 #endif
   case THEN: binOp = L'\u2192'; break;
   case EQ: binOp = L'\u2194'; break;

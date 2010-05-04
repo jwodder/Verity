@@ -21,6 +21,11 @@ Things that need to be done or should be done:
  - Ignore (for syntactic purposes) invalid characters in input rather than
    exiting with an error
  - Support wide-character versions of the built-in operators in input
+ - Add a switch for setting what characters to use for operators on input
+ - Add a switch for setting what characters to use for operators on plain
+   text/Unicode output
+ - Try to write my own parser, thereby omitting the need for Yacc/Bison
+ - Give AND higher precedence than OR?
 
 Ideas for possible new features:
  - Make commas valid statement delimiters
@@ -52,3 +57,6 @@ Ideas for possible new features:
    alternatively, rewrite the grammar so that it transparently allows 'x's and
    'v's as either operators or variables)
  - Add a ternary/conditional operator
+ - K-map output?
+ - NAND (-(p^q)) and NOR (-(pvq)) operators?
+ - Add a switch for reversing the order of the rows in the output

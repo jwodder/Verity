@@ -2,7 +2,7 @@ OBJS = verity.tab.o verilex.o veritypes.o veriprint.o
 CC = c99
 CFLAGS = -O2
 
-.PHONY : all clear
+.PHONY : all clean
 all : verity verity.1
 
 verity : $(OBJS)
@@ -22,5 +22,5 @@ verity.tab.c verity.tab.h : verity.y
 
 verity.1 : verity.pod
 	pod2man -c '' -r 'Version 1.3' verity.pod verity.1
-clear :
+clean :
 	-rm -f *.o verity.tab.[ch]
