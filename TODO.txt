@@ -1,5 +1,7 @@
 VERITY TO-DO
 Things that need to be done or should be done:
+ - Document the -u & -U options
+  - Come up with a better way to describe them than as using "Unicode text"
  - Improve the quality of the PostScript output:
   - Make the dot in the (old) XOR symbol actually be centered
   - Lower the tops of the vertical bars & lower their bottoms
@@ -14,8 +16,6 @@ Things that need to be done or should be done:
  - Test out error recovery more (including checking for memory leaks)
  - If OLD_XOR_SYM is not defined, treat 'x' in input as a variable?
  - Deal with the overly long line output in the usage messages
- - Document the -u & -U options
-  - Come up with a better way to describe them than as using "Unicode text"
  - Try to handle outputting of Unicode characters that don't exist in the
    current locale
  - Ignore (for syntactic purposes) invalid characters in input rather than
@@ -25,13 +25,13 @@ Things that need to be done or should be done:
  - Add a switch for setting what characters to use for operators on plain
    text/Unicode output
  - Try to write my own parser, thereby omitting the need for Yacc/Bison
- - Give AND higher precedence than OR?
 
 Ideas for possible new features:
+ - Allow Unicode input
+ - Give AND higher precedence than OR?
+ - Change "->" to be right-associative?
+ - Implement NAND, NOR, and "<-" operators
  - Make commas valid statement delimiters
- - Allow multi-block files to alternate between braces-enclosed statements and
-   unenclosed statements (maybe)
- - Add a "<-" operator
  - Implement a way for users to define their own boolean functions/operators
   - If a binary function is used between two variables without parentheses
     around any arguments, it is interpreted as a binary operator with left
@@ -50,6 +50,7 @@ Ideas for possible new features:
  - Implement non-standalone PostScript output
  - Implement embedded PostScript output
  - Implement *roff/tbl(1) output
+ - Implement K-map output?
  - Sort variables in the tables in alphabetical order
  - Allow identifier names to be arbitrarily long strings of non-whitespace,
    non-parenthesis characters (including wide characters)
@@ -57,6 +58,7 @@ Ideas for possible new features:
    alternatively, rewrite the grammar so that it transparently allows 'x's and
    'v's as either operators or variables)
  - Add a ternary/conditional operator
- - K-map output?
- - NAND (-(p^q)) and NOR (-(pvq)) operators?
  - Add a switch for reversing the order of the rows in the output
+ - Allow multi-block files to alternate between braces-enclosed statements and
+   unenclosed statements (maybe)
+ - Add English names for operators (e.g., "NOT", "AND", "THEN", etc.)?

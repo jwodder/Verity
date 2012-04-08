@@ -1,4 +1,4 @@
-=== Verity - v.1.3 - README.txt ===
+=== Verity - v.1.4 - README.txt ===
 
 0. CONTENTS
 
