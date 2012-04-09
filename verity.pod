@@ -15,7 +15,7 @@ B<verity> [B<-h> | B<-V>]
 B<Verity> is a utility for generating truth tables for sets of logical
 statements.  Output can be as plain text, a TeX table, a LaTeX I<tabular>
 environment, or a PostScript document.  The statements can be read from the
-standard input or an I<infile> or simply passed to B<Verity> on the command
+standard input or an I<infile> or simply passed to B<verity> on the command
 line as the argument to an B<-e> flag.  The syntax for the statements is
 descriped below under L</"STATEMENT SYNTAX">.
 
@@ -102,7 +102,7 @@ required if a new statement is to immediately follow.
 
 =head1 EXAMPLES
 
-The following line causes B<Verity> to output the combined truth table for the
+The following line causes B<verity> to output the combined truth table for the
 statements ``p AND q'' and ``p OR q'':
 
     p ^ q; p v q
@@ -125,7 +125,7 @@ reference in the statement after it.
     S -> q&r
     pvr <-> !(~p ^ ~r)
 
-When input to B<Verity>, the above statements yield the truth table:
+When input to B<verity>, the above statements yield the truth table:
 
     p|q|r|-pxq|S : pv-q|S->q^r|pvr<->-(-p^-r)
     -|-|-|----|--------|------|--------------

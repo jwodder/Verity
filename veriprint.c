@@ -29,21 +29,19 @@
 void printDocTop(void) {
  if (flags.tblType == latexTbl)
   puts("\\documentclass{article}\n\\begin{document}\n\\begin{center}");
- else if (flags.tblType == psTbl) {
+ else if (flags.tblType == psTbl)
   puts("%!PS-Adobe-3.0\n"
-   "/fontSize 12 def\n"
-   "/varFont /Times-Italic findfont fontSize scalefont def\n"
-   "/truthFont /Times-Roman findfont fontSize scalefont def\n"
-   "truthFont setfont /em (M) stringwidth pop def\n"
-   "/TPad em (T) stringwidth pop sub 2 div def\n"
-   "/FPad em (F) stringwidth pop sub 2 div def\n"
-   "/barPad em 4 div def\n"
-   /* barPad = padding on each side of table bars, including half the width of
-    * the bars */
-   "/symFont /Symbol findfont fontSize scalefont def\n"
-   "72 720 fontSize add moveto\n"
-  );
- }
+       "/fontSize 12 def\n"
+       "/varFont /Times-Italic findfont fontSize scalefont def\n"
+       "/truthFont /Times-Roman findfont fontSize scalefont def\n"
+       "truthFont setfont /em (M) stringwidth pop def\n"
+       "/TPad em (T) stringwidth pop sub 2 div def\n"
+       "/FPad em (F) stringwidth pop sub 2 div def\n"
+       "/barPad em 4 div def\n"
+       /* barPad = padding on each side of table bars, including half the width
+	* of the bars */
+       "/symFont /Symbol findfont fontSize scalefont def\n"
+       "72 720 fontSize add moveto\n");
 }
 
 void printDocEnd(void) {
@@ -62,10 +60,7 @@ void printTbl(void) {
  switch (flags.tblType) {
   case latexTbl: printLaTeXTbl(vars, varno); break;
   case texTbl: printTeXTbl(vars, varno); break;
-  case txtTbl:
-  case wideTbl:
-   printTxtTbl(vars, varno);
-   break;
+  case txtTbl: case wideTbl: printTxtTbl(vars, varno); break;
   case utfTbl: printUTFTbl(vars, varno); break;
   case psTbl: printPSTbl(vars, varno); break;
  }
@@ -83,7 +78,9 @@ void printLaTeXTbl(symbol** vars, int varno) {
  fputs("}\n", stdout);
  for (i=0; i<varno; i++) {
   if (i) fputs(" & ", stdout);
-  putchar('$'); putchar(vars[i]->c); putchar('$');
+  putchar('$');
+  putchar(vars[i]->c);
+  putchar('$');
  }
  for (expr* ex = statements; ex != NULL; ex = ex->next) {
   fputs(" & $", stdout);
@@ -148,14 +145,14 @@ void printTeXExp(expr* ex) {
  switch (ex->oper) {
   case 0: putchar(ex->sym->c); break;
   case NOT: fputs("\\neg ", stdout); printTeXExp(ex->args[0]); break;
-  case AND: binOp = " \\wedge "; break;
-  case OR: binOp = " \\vee "; break;
+  case AND: binOp = " \\land "; break;
+  case OR: binOp = " \\lor "; break;
 #ifdef OLD_XOR_SYM
   case XOR: binOp = " \\dot{\\vee} "; break;
 #else
   case XOR: binOp = " \\oplus "; break;
 #endif
-  case THEN: binOp = " \\rightarrow "; break;
+  case THEN: binOp = " \\to "; break;
   case EQ: binOp = " \\leftrightarrow "; break;
   case ':':
    putchar(ex->sym->c);
@@ -326,7 +323,7 @@ int printUTFExp(expr* ex) {
 
 void printPSTbl(symbol** vars, int varno) {
  puts("/tableTop currentpoint exch pop fontSize sub def\n"
-  "72 tableTop fontSize sub moveto varFont setfont");
+      "72 tableTop fontSize sub moveto varFont setfont");
  printf("/stmntWidths %d array def\n", stmntQty);
  int i;
  for (i=0; i<varno; i++) {
@@ -343,7 +340,7 @@ void printPSTbl(symbol** vars, int varno) {
   puts("barPad 0 rmoveto");
  }
  puts("0 barPad neg rmoveto 72 currentpoint exch pop lineto\n"
-  "0 barPad neg rmoveto truthFont setfont");
+      "0 barPad neg rmoveto truthFont setfont");
  do {
   puts("72 currentpoint exch pop fontSize sub moveto");
   for (i=0; i<varno; i++) {
@@ -358,16 +355,18 @@ void printPSTbl(symbol** vars, int varno) {
   }
   for (i=varno-1; i>=0; i--) if (!(vars[i]->truth = !(vars[i]->truth))) break;
  } while (i >= 0);
- puts("/tableBottom currentpoint exch pop def");
- printf("1 1 %d {\n"
-  " em barPad 2 mul add mul 72 add dup tableBottom moveto tableTop lineto\n"
-  "} for\n", varno);
- printf("0 1 %d 2 sub {\n"
-  " stmntWidths exch get barPad 2 mul add 0 rmoveto\n"
-  " 0 tableBottom tableTop sub rlineto\n"
-  " 0 tableTop tableBottom sub rmoveto\n"
-  "} for\n", stmntQty);
- puts("0 tableBottom tableTop sub rmoveto");
+ printf("/tableBottom currentpoint exch pop def"
+	"1 1 %d {\n"
+	" em barPad 2 mul add mul 72 add dup tableBottom moveto\n"
+	" tableTop lineto\n"
+	"} for\n"
+	"0 1 %d 2 sub {\n"
+	" stmntWidths exch get barPad 2 mul add 0 rmoveto\n"
+	" 0 tableBottom tableTop sub rlineto\n"
+	" 0 tableTop tableBottom sub rmoveto\n"
+	"} for\n"
+	"0 tableBottom tableTop sub rmoveto\n",
+	varno, stmntQty);
 }
 
 void printPSExp(expr* ex) {
@@ -386,9 +385,9 @@ void printPSExp(expr* ex) {
 #ifdef OLD_XOR_SYM
    printPSExp(ex->args[0]);
    puts("symFont setfont\n"
-    "<DA> dup show stringwidth pop 2 div dup neg 0 rmoveto\n"
-    "truthFont setfont <C7> dup stringwidth pop -2 div dup 0 rmoveto\n"
-    "exch show add 0 rmoveto varFont setfont");
+	"<DA> dup show stringwidth pop 2 div dup neg 0 rmoveto\n"
+	"truthFont setfont <C7> dup stringwidth pop -2 div dup 0 rmoveto\n"
+	"exch show add 0 rmoveto varFont setfont");
    printPSExp(ex->args[1]);
 #else
    binOp = "<C5>";

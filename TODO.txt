@@ -1,38 +1,56 @@
-VERITY TO-DO
-Things that need to be done or should be done:
+Documentation:
  - Document the -u & -U options
   - Come up with a better way to describe them than as using "Unicode text"
+ - Properly document the nature of OLD_XOR_SYM somewhere prominently in the
+   README
+ - Amend the note on the XOR symbol in the manpage appropriately
+
+Error-handling & robustness:
+ - Test out error recovery more (including checking for memory leaks)
+ - Ignore (for syntactic purposes) invalid characters in input rather than
+   exiting with an error
+ - Try to handle outputting of Unicode characters that don't exist in the
+   current locale
+
+Input:
+ - Allow Unicode input
+ - Implement English names for operators (e.g., "NOT", "AND", "THEN",
+   "NOR"/"NEQ", etc.)
+ - Add a switch for setting what characters to use for operators on input
+ - Add a switch for disabling recognition of 'v' and 'x' as operators (or,
+   alternatively, rewrite the grammar so that it transparently allows 'x's and
+   'v's as either operators or variables)
+ - If OLD_XOR_SYM is not defined, treat 'x' in input as a variable?
+ - Make commas valid statement delimiters
+ - Allow multi-block files to alternate between braces-enclosed statements and
+   unenclosed statements?
+
+Output:
+ - Add a switch for setting what characters to use for operators on plain
+   text/Unicode output
  - Improve the quality of the PostScript output:
   - Make the dot in the (old) XOR symbol actually be centered
   - Lower the tops of the vertical bars & lower their bottoms
   - Lower the horizontal bars a bit?
   - Center the tables?
   - Adjust the spacing between symbols?
- - Handle PostScript tables that approach the bottom of the page (and ones that
-   are too wide for the page?)
- - Properly document the nature of OLD_XOR_SYM somewhere prominently in the
-   README
- - Amend the note on the XOR symbol in the manpage appropriately
- - Test out error recovery more (including checking for memory leaks)
- - If OLD_XOR_SYM is not defined, treat 'x' in input as a variable?
- - Deal with the overly long line output in the usage messages
- - Try to handle outputting of Unicode characters that don't exist in the
-   current locale
- - Ignore (for syntactic purposes) invalid characters in input rather than
-   exiting with an error
- - Support wide-character versions of the built-in operators in input
- - Add a switch for setting what characters to use for operators on input
- - Add a switch for setting what characters to use for operators on plain
-   text/Unicode output
- - Try to write my own parser, thereby omitting the need for Yacc/Bison
+  - Handle tables that approach the bottom of the page (and ones that are too
+    wide for the page?)
+ - Sort variables in the tables in alphabetical order
+ - Add a switch for reversing the order of the rows in the output
+ - Implement non-standalone PostScript output
+ - Implement embedded PostScript output
+ - Implement *roff/tbl(1) output
+ - Implement K-map output?
 
-Ideas for possible new features:
- - Allow Unicode input
- - Give AND higher precedence than OR?
+Logic:
+ - Implement NAND, NOR, "<-", and a ternary/conditional operator
  - Change "->" to be right-associative?
- - Implement NAND, NOR, and "<-" operators
- - Make commas valid statement delimiters
- - Implement a way for users to define their own boolean functions/operators
+ - Give AND higher precedence than OR?
+ - Allow identifier names to be arbitrarily long strings of non-whitespace,
+   non-parenthesis characters (including wide characters)
+ - Idea for later: Implement a way for users to define their own boolean
+   functions/operators
   - If a binary function is used between two variables without parentheses
     around any arguments, it is interpreted as a binary operator with left
     associativity (and this use should be honored in the output notation).
@@ -47,18 +65,7 @@ Ideas for possible new features:
   - Variables that are not parameters may be used inside function definitions,
     in which case they refer to variables with those names declared for the
     block (so be careful to avoid implementing dynamic scoping).
- - Implement non-standalone PostScript output
- - Implement embedded PostScript output
- - Implement *roff/tbl(1) output
- - Implement K-map output?
- - Sort variables in the tables in alphabetical order
- - Allow identifier names to be arbitrarily long strings of non-whitespace,
-   non-parenthesis characters (including wide characters)
- - Add a switch for disabling recognition of 'v' and 'x' as operators (or,
-   alternatively, rewrite the grammar so that it transparently allows 'x's and
-   'v's as either operators or variables)
- - Add a ternary/conditional operator
- - Add a switch for reversing the order of the rows in the output
- - Allow multi-block files to alternate between braces-enclosed statements and
-   unenclosed statements (maybe)
- - Add English names for operators (e.g., "NOT", "AND", "THEN", etc.)?
+
+Other:
+ - Try to write my own parser, thereby omitting the need for Yacc/Bison
+ - Deal with the overly long line output in the usage messages?

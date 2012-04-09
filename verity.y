@@ -47,40 +47,40 @@ extern FILE* yyin;
 
 %%
 
-file: exprSet gap {printTbl(); if (flags.standalone) printDocEnd(); }
-	| blocks gap {if (flags.standalone) printDocEnd(); }
-	;
+file : exprSet gap  {printTbl(); if (flags.standalone) printDocEnd(); }
+     | blocks  gap  {if (flags.standalone) printDocEnd(); }
+     ;
 
-blocks: blocks gap '{' exprSet gap '}'  {printTbl(); clearLists(); }
-	| gap '{' exprSet gap '}'  {printTbl(); clearLists(); }
-	;
+blocks : blocks gap '{' exprSet gap '}'  {printTbl(); clearLists(); }
+       |        gap '{' exprSet gap '}'  {printTbl(); clearLists(); }
+       ;
 
-exprSet: exprSet gap EOL statement  {addStmnt($4); }
-	| gap statement  {addStmnt($2); }
+exprSet : exprSet gap EOL statement  {addStmnt($4); }
+	| gap statement              {addStmnt($2); }
 	;
 
 gap: gap EOL | ;
 
-statement: SYM ':' expr  {$$ = colonExpr($1, $3); }
-	| expr  {$$ = $1; }
-	| blight {yyerrok; $$ = NULL; }
-	;
+statement : SYM ':' expr   {$$ = colonExpr($1, $3); }
+	  | expr           {$$ = $1; }
+	  | blight         {yyerrok; $$ = NULL; }
+	  ;
 
-blight: blight error
-	| blight expr  {freeExpr($2); }
-	| expr error  {freeExpr($1); }
-	| error
-	;
+blight : blight error
+       | blight expr  {freeExpr($2); }
+       | expr error   {freeExpr($1); }
+       | error
+       ;
 
-expr: SYM  {$$ = symExpr($1); }
-	| NOT expr  {$$ = notExpr($2); }
-	| expr AND expr  {$$ = opExpr(AND, $1, $3); }
-	| expr OR expr  {$$ = opExpr(OR, $1, $3); }
-	| expr XOR expr  {$$ = opExpr(XOR, $1, $3); }
-	| expr THEN expr  {$$ = opExpr(THEN, $1, $3); }
-	| expr EQ expr  {$$ = opExpr(EQ, $1, $3); }
-	| '(' expr ')'  {$$ = parenExpr($2); }
-	;
+expr : SYM             {$$ = symExpr($1); }
+     | NOT expr        {$$ = notExpr($2); }
+     | expr AND  expr  {$$ = opExpr(AND, $1, $3); }
+     | expr OR   expr  {$$ = opExpr(OR, $1, $3); }
+     | expr XOR  expr  {$$ = opExpr(XOR, $1, $3); }
+     | expr THEN expr  {$$ = opExpr(THEN, $1, $3); }
+     | expr EQ   expr  {$$ = opExpr(EQ, $1, $3); }
+     | '(' expr ')'    {$$ = parenExpr($2); }
+     ;
 
 %%
 
@@ -94,6 +94,10 @@ void yyerror(char* s, ...) {
  fputc('\n', stderr);
 }
 
+const char usage[] =
+ "Usage: %s [-PptluU] [-s] [-o outfile] [-e statements | infile]\n"
+ "       %s [-h | -V]\n";
+
 int main(int argc, char** argv) {
  if (setlocale(LC_ALL, "") == NULL) perror("verity: error setting locale");
  int opt;
@@ -106,12 +110,12 @@ int main(int argc, char** argv) {
      return 5;
     }
     break;
-   case 'p': flags.tblType = txtTbl; break;
-   case 'u': flags.tblType = wideTbl; break;
-   case 'U': flags.tblType = utfTbl; break;
+   case 'p': flags.tblType = txtTbl;   break;
+   case 'u': flags.tblType = wideTbl;  break;
+   case 'U': flags.tblType = utfTbl;   break;
    case 'l': flags.tblType = latexTbl; break;
-   case 't': flags.tblType = texTbl; break;
-   case 'P': flags.tblType = psTbl; break;
+   case 't': flags.tblType = texTbl;   break;
+   case 'P': flags.tblType = psTbl;    break;
    case 'e':
     if (!flags.eval) {
      flags.eval = 1;
@@ -131,25 +135,21 @@ int main(int argc, char** argv) {
      __DATE__, __TIME__);
     return 0;
    case 'h':
-    printf("Usage: verity [-P | -p | -t | -l | -u | -U] [-s] [-o outfile] [-e"
-     " statements | infile]\n       verity [-h | -V]\n\n"
-     "Options:\n"
-     "  -e statements - Treat `statements' as input\n"
-     "  -h - Print this summary of command-line options and exit\n"
-     "  -l - Output a LaTeX tabular\n"
-     "  -o outfile - Write output to `outfile'\n"
-     "  -P - Output a PostScript document\n"
-     "  -p - Output plain text\n"
-     "  -s - Output a complete Tex/LaTeX document\n"
-     "  -t - Output a TeX table\n"
-     "  -u - Output plain text with Unicode operators\n"
-     "  -U - Output a Unicode table\n"
-     "  -V - Print version information and exit\n");
+    printf(usage, argv[0], argv[0]);
+    puts("\nOptions:\n"
+	   "  -e statements - Treat `statements' as input\n"
+	   "  -h - Print this summary of command-line options and exit\n"
+	   "  -l - Output a LaTeX tabular\n"
+	   "  -o outfile - Write output to `outfile'\n"
+	   "  -P - Output a PostScript document\n"
+	   "  -p - Output plain text\n"
+	   "  -s - Output a complete Tex/LaTeX document\n"
+	   "  -t - Output a TeX table\n"
+	   "  -u - Output plain text with Unicode operators\n"
+	   "  -U - Output a Unicode table\n"
+	   "  -V - Print version information and exit");
     return 0;
-   default:
-    fprintf(stderr, "Usage: verity [-P | -p | -t | -l | -u | -U] [-s] [-o"
-     " outfile] [-e statements | infile]\n       verity [-h | -V]\n");
-    return 2;
+   default: fprintf(stderr, usage, argv[0], argv[0]); return 2;
   }
  }
  if (flags.eval) rewind(yyin);

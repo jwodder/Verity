@@ -16,9 +16,9 @@ output tables as plain ASCII text, TeX or LaTeX markup, and PostScript.  See
 the manpage for more information.
 
 Verity was written by John T. Wodder II <jwodder@sdf.lonestar.org> and is
-licensed under the GNU GPL, v.3 or later.  There's no official project site,
-but, if you have a Gopher client, you should be able to find the latest version
-at <gopher://sdf.lonestar.org/9/users/jwodder/src/verity-src.tgz>.
+licensed under the GNU GPL, v.3 or later.  The latest version and any
+half-baked changes to it in the works can be found at
+<http://github.com/jwodder/Verity>.
 
 
 2. FILE LIST
@@ -51,6 +51,7 @@ veritypes.h - the header file for veritypes.c
  - Syntax error messages made more descriptive; Bison now required even more
  - Added PostScript output
  - '=' and "==" now accepted as alternatives for "<->"
+
 ??? - v.1.4:
  - '+' now accepted as an alternative to 'x' and 'X'
  - The symbol to use for XOR in output can now be set by #defining or not
