@@ -152,11 +152,9 @@ Currently, the PostScript output takes no special steps to deal with tables
 going off the edge of the page; if one table reaches the bottom, any tables
 after it won't show up.
 
-=head1 NOTES
+=head1 SEE ALSO
 
-The symbol used for XOR in (La)TeX and PostScript output -- that of OR with a
-dot drawn above it -- is not the most common symbol for the operation, and I am
-considering changing it to something more well-known.
+L<http://github.com/jwodder/Verity>
 
 =head1 AUTHOR
 

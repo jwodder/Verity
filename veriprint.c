@@ -223,7 +223,7 @@ int printTxtExp(expr* ex) {
 #ifdef OLD_XOR_SYM
   case XOR: binOp = "x"; break;
 #else
-  case XOR: binOp = "+"; break;  /* Reconsider this */
+  case XOR: binOp = "+"; break;  /* TODO: Reconsider this */
 #endif
   case THEN: binOp = "->"; break;
   case EQ: binOp = "<->"; break;

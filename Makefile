@@ -1,6 +1,9 @@
+#CC = c99
+#CFLAGS = -O2 -Wall
+CC = gcc
+CFLAGS = -std=c99 -O2 -Wall
+
 OBJS = verity.tab.o verilex.o veritypes.o veriprint.o
-CC = c99
-CFLAGS = -O2
 
 .PHONY : all clean
 all : verity verity.1
