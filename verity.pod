@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-B<verity> - generates truth tables of logical statements
+B<verity> - generate truth tables of logical statements
 
 =head1 SYNOPSIS
 
